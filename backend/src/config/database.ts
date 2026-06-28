@@ -5,6 +5,9 @@ dotenv.config();
 
 const connectDB = async (): Promise<void> => {
     try {
+        if (mongoose.connection.readyState >= 1) {
+            return;
+        }
         // Use MongoDB Atlas cloud database (free tier) as fallback
         const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://semester-admin:Semester2024Pass@cluster0.jtwyx.mongodb.net/semester-manager?retryWrites=true&w=majority';
 
