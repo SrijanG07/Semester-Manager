@@ -1,8 +1,9 @@
 import { Response } from 'express';
 import Attendance from '../models/Attendance';
+import Subject from '../models/Subject';
 import { AuthRequest } from '../middleware/auth';
 
-// @desc Mark attendance
+// @desc Mark attendance for a single day
 // @route POST /api/subjects/:id/attendance
 export const markAttendance = async (req: AuthRequest, res: Response) => {
     try {
@@ -17,6 +18,93 @@ export const markAttendance = async (req: AuthRequest, res: Response) => {
 
         res.status(201).json(attendance);
     } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Bulk sync attendance (set count)
+// @route POST /api/subjects/attendance/sync
+export const syncAttendance = async (req: AuthRequest, res: Response) => {
+    try {
+        const { attendanceData } = req.body;
+        // attendanceData format: { "Subject Name": { attended: 5, total: 10, missedDates: ["1 May", "3 May"] } }
+
+        if (!attendanceData || typeof attendanceData !== 'object') {
+            return res.status(400).json({ message: 'Invalid attendance data' });
+        }
+
+        const userId = (req as any).user?.id;
+        const results: any[] = [];
+
+        for (const [subjectName, data] of Object.entries(attendanceData) as any) {
+            // Find matching subject by name (case-insensitive partial match)
+            let subject = await Subject.findOne({
+                userId,
+                name: { $regex: new RegExp(subjectName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') },
+            });
+
+            if (!subject) {
+                // Auto-create subject if not found
+                subject = await Subject.create({
+                    userId,
+                    name: subjectName,
+                    code: subjectName.split(' ').map((w: string) => w[0]).join('').toUpperCase(),
+                    credits: 0,
+                    semester: 'Current',
+                });
+            }
+
+            // Clear existing attendance for this subject (full resync)
+            await Attendance.deleteMany({ subjectId: subject._id });
+
+            // Create attendance records — present ones
+            const attendedCount = data.attended || 0;
+            const totalCount = data.total || 0;
+            const absentCount = totalCount - attendedCount;
+
+            const records: any[] = [];
+
+            // Create "present" records
+            for (let i = 0; i < attendedCount; i++) {
+                records.push({
+                    subjectId: subject._id,
+                    date: new Date(Date.now() - i * 24 * 60 * 60 * 1000), // Spread across days
+                    status: 'present',
+                    notes: 'Synced',
+                });
+            }
+
+            // Create "absent" records using missed dates if available
+            const missedDates = data.missedDates || [];
+            for (let i = 0; i < absentCount; i++) {
+                const dateNote = missedDates[i] ? `Missed on ${missedDates[i]}` : 'Absent';
+                records.push({
+                    subjectId: subject._id,
+                    date: new Date(Date.now() - (attendedCount + i) * 24 * 60 * 60 * 1000),
+                    status: 'absent',
+                    notes: dateNote,
+                });
+            }
+
+            if (records.length > 0) {
+                await Attendance.insertMany(records);
+            }
+
+            results.push({
+                subject: subjectName,
+                subjectId: subject._id,
+                attended: attendedCount,
+                total: totalCount,
+                percentage: totalCount > 0 ? ((attendedCount / totalCount) * 100).toFixed(2) : '0',
+            });
+        }
+
+        res.json({
+            message: `Synced attendance for ${results.length} subjects`,
+            results,
+        });
+    } catch (error: any) {
+        console.error('Attendance sync error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -62,8 +150,6 @@ export const getAttendanceStats = async (req: AuthRequest, res: Response) => {
         let classesNeeded = 0;
 
         if (attendancePercentage < target) {
-            // Formula: classesNeeded = (target * (totalClasses + x) - presentClasses) / (1 - target/100)
-            // Solving for x where x is classes to attend
             classesNeeded = Math.ceil((target * totalClasses - presentClasses * 100) / (100 - target));
         }
 
@@ -75,6 +161,12 @@ export const getAttendanceStats = async (req: AuthRequest, res: Response) => {
             attendancePercentage: attendancePercentage.toFixed(2),
             classesNeeded: Math.max(0, classesNeeded),
             belowTarget: attendancePercentage < target,
+            // Also return in the format the frontend AttendanceTab expects
+            percentage: attendancePercentage,
+            present: presentClasses,
+            absent: absentClasses,
+            late: lateClasses,
+            total: totalClasses,
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });

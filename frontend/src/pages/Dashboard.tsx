@@ -11,25 +11,45 @@ import api from "../utils/api";
 const Dashboard = () => {
     const [stats, setStats] = useState({
         subjectsCount: 0,
-        studyHours: 0,
+        studyHours: '0',
         deadlinesCount: 0,
-        avgScore: 0
+        avgScore: 0,
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [subjects, deadlines] = await Promise.all([
+                const [subjectsRes, deadlinesRes, studyRes] = await Promise.all([
                     api.get('/subjects'),
-                    api.get('/deadlines')
+                    api.get('/deadlines'),
+                    api.get('/study-sessions/stats?period=week').catch(() => ({ data: { totalHours: '0' } })),
                 ]);
 
+                const subjects = subjectsRes.data;
+
+                // Calculate average score across all subjects
+                let totalScore = 0;
+                let scoredCount = 0;
+
+                const scoreResults = await Promise.allSettled(
+                    subjects.map((s: any) => api.get(`/subjects/${s._id}/calculate`))
+                );
+
+                scoreResults.forEach((result) => {
+                    if (result.status === 'fulfilled' && result.value.data?.currentScore > 0) {
+                        totalScore += result.value.data.currentScore;
+                        scoredCount++;
+                    }
+                });
+
+                const avgScore = scoredCount > 0 ? Math.round(totalScore / scoredCount) : 0;
+
                 setStats({
-                    subjectsCount: subjects.data.length,
-                    studyHours: 0, // Will be calculated from study sessions
-                    deadlinesCount: deadlines.data.filter((d: any) => !d.completed).length,
-                    avgScore: 0 // Will be calculated from scores
+                    subjectsCount: subjects.length,
+                    studyHours: parseFloat(studyRes.data.totalHours || '0').toFixed(1),
+                    deadlinesCount: deadlinesRes.data.filter((d: any) => !d.completed).length,
+                    avgScore,
                 });
             } catch (error) {
                 console.error('Failed to fetch stats:', error);
@@ -54,6 +74,7 @@ const Dashboard = () => {
                 <StatCard
                     title="Average Score"
                     value={stats.avgScore > 0 ? `${stats.avgScore}%` : "N/A"}
+                    subtitle={stats.avgScore > 0 ? "Across all subjects" : "Add scores to see"}
                     icon={Target}
                     variant="success"
                 />

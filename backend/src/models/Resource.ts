@@ -6,6 +6,7 @@ export interface IResource extends Document {
     title: string;
     type: 'PYQ' | 'Book' | 'Class Notes' | 'Personal Notes';
     fileUrl?: string;
+    firebaseStoragePath?: string;
     externalLink?: string;
     completed: boolean;
     hasPersonalNotes: boolean;
@@ -36,6 +37,9 @@ const resourceSchema = new Schema<IResource>(
             required: true,
         },
         fileUrl: {
+            type: String,
+        },
+        firebaseStoragePath: {
             type: String,
         },
         externalLink: {

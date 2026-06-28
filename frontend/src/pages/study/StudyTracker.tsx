@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import api from '../../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface StudySession {
     _id: string;
@@ -130,14 +130,14 @@ const StudyTracker: React.FC = () => {
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <DashboardLayout title="Study Tracker" subtitle="Track your study sessions">
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
-                        <p className="text-gray-600">Loading study tracker...</p>
+                        <p className="text-muted-foreground">Loading study tracker...</p>
                     </div>
                 </div>
             </DashboardLayout>
@@ -145,186 +145,182 @@ const StudyTracker: React.FC = () => {
     }
 
     return (
-        <DashboardLayout>
-            <div className="p-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">⏱️ Study Tracker</h1>
+        <DashboardLayout title="Study Tracker" subtitle="Track your study sessions">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                {/* Timer Panel */}
+                <div className="lg:col-span-2 bg-card rounded-lg border border-border p-6">
+                    <h2 className="text-xl font-bold text-foreground mb-4">
+                        {isTimerRunning ? '🔴 Session Active' : 'Start Study Session'}
+                    </h2>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    {/* Timer Panel */}
-                    <div className="lg:col-span-2 card">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">
-                            {isTimerRunning ? '🔴 Session Active' : 'Start Study Session'}
-                        </h2>
-
-                        {!isTimerRunning ? (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Select Subject *
-                                    </label>
-                                    <select
-                                        className="input"
-                                        value={selectedSubject}
-                                        onChange={(e) => setSelectedSubject(e.target.value)}
-                                    >
-                                        <option value="">Choose a subject...</option>
-                                        {subjects.map((subject) => (
-                                            <option key={subject._id} value={subject._id}>
-                                                {subject.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Focus Level
-                                    </label>
-                                    <div className="flex gap-2">
-                                        {['low', 'medium', 'high'].map((level) => (
-                                            <button
-                                                key={level}
-                                                onClick={() => setFocusLevel(level)}
-                                                className={`flex-1 py-2 rounded-lg transition ${focusLevel === level
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                    }`}
-                                            >
-                                                {level.charAt(0).toUpperCase() + level.slice(1)}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={startSession}
-                                    className="w-full btn btn-primary py-3 text-lg"
-                                >
-                                    Start Session
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="text-center">
-                                <div className="text-6xl font-bold text-blue-600 mb-4">
-                                    {formatTime(elapsedTime)}
-                                </div>
-                                <p className="text-gray-600 mb-6">
-                                    Studying: {subjects.find(s => s._id === selectedSubject)?.name}
-                                </p>
-
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Session Notes (Optional)
-                                    </label>
-                                    <textarea
-                                        className="input"
-                                        rows={3}
-                                        value={sessionNotes}
-                                        onChange={(e) => setSessionNotes(e.target.value)}
-                                        placeholder="What did you learn?"
-                                    />
-                                </div>
-
-                                <button
-                                    onClick={stopSession}
-                                    className="w-full btn bg-red-600 text-white hover:bg-red-700 py-3 text-lg"
-                                >
-                                    Stop & Save Session
-                                </button>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Stats Panel */}
-                    <div className="card">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">This Week</h2>
+                    {!isTimerRunning ? (
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm text-gray-600">Total Study Time</p>
-                                <p className="text-3xl font-bold text-blue-600">{stats?.totalHours || 0}h</p>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                    Select Subject *
+                                </label>
+                                <select
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
+                                    value={selectedSubject}
+                                    onChange={(e) => setSelectedSubject(e.target.value)}
+                                >
+                                    <option value="">Choose a subject...</option>
+                                    {subjects.map((subject) => (
+                                        <option key={subject._id} value={subject._id}>
+                                            {subject.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Sessions Completed</p>
-                                <p className="text-2xl font-bold text-green-600">{stats?.sessionCount || 0}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Average per Session</p>
-                                <p className="text-2xl font-bold text-purple-600">
-                                    {stats && stats.sessionCount > 0
-                                        ? (stats.totalMinutes / stats.sessionCount).toFixed(0)
-                                        : 0}min
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Subject Distribution */}
-                {stats && stats.subjectDistribution.length > 0 && (
-                    <div className="card mb-6">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Subject-wise Time Distribution</h2>
-                        <div className="space-y-3">
-                            {stats.subjectDistribution.map((subject) => (
-                                <div key={subject.subjectId}>
-                                    <div className="flex justify-between items-center mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <div
-                                                className="w-3 h-3 rounded-full"
-                                                style={{ backgroundColor: subject.subjectColor }}
-                                            />
-                                            <span className="font-medium text-gray-900">{subject.subjectName}</span>
-                                        </div>
-                                        <span className="text-sm text-gray-600">
-                                            {(subject.totalMinutes / 60).toFixed(1)}h
-                                        </span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                        <div
-                                            className="h-2 rounded-full"
-                                            style={{
-                                                width: `${(subject.totalMinutes / (stats.totalMinutes || 1)) * 100}%`,
-                                                backgroundColor: subject.subjectColor,
-                                            }}
-                                        />
-                                    </div>
+                            <div>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                    Focus Level
+                                </label>
+                                <div className="flex gap-2">
+                                    {['low', 'medium', 'high'].map((level) => (
+                                        <button
+                                            key={level}
+                                            onClick={() => setFocusLevel(level)}
+                                            className={`flex-1 py-2 rounded-lg transition ${focusLevel === level
+                                                    ? 'bg-primary text-primary-foreground'
+                                                    : 'bg-muted text-muted-foreground hover:bg-accent'
+                                                }`}
+                                        >
+                                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                                        </button>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                            </div>
 
-                {/* Recent Sessions */}
-                <div className="card">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Sessions</h2>
-                    {sessions.length === 0 ? (
-                        <p className="text-gray-600 text-center py-8">No study sessions yet. Start your first session!</p>
+                            <button
+                                onClick={startSession}
+                                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-3 text-lg rounded-lg transition"
+                            >
+                                Start Session
+                            </button>
+                        </div>
                     ) : (
-                        <div className="space-y-3">
-                            {sessions.slice(0, 10).map((session) => (
-                                <div key={session._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div
-                                            className="w-3 h-3 rounded-full"
-                                            style={{ backgroundColor: session.subjectId.color }}
-                                        />
-                                        <div>
-                                            <p className="font-medium text-gray-900">{session.subjectId.name}</p>
-                                            <p className="text-sm text-gray-600">
-                                                {new Date(session.date).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-semibold text-blue-600">{session.duration} min</p>
-                                        {session.focusLevel && (
-                                            <p className="text-xs text-gray-500 capitalize">{session.focusLevel} focus</p>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="text-center">
+                            <div className="text-6xl font-bold text-primary mb-4">
+                                {formatTime(elapsedTime)}
+                            </div>
+                            <p className="text-muted-foreground mb-6">
+                                Studying: {subjects.find(s => s._id === selectedSubject)?.name}
+                            </p>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                    Session Notes (Optional)
+                                </label>
+                                <textarea
+                                    className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors"
+                                    rows={3}
+                                    value={sessionNotes}
+                                    onChange={(e) => setSessionNotes(e.target.value)}
+                                    placeholder="What did you learn?"
+                                />
+                            </div>
+
+                            <button
+                                onClick={stopSession}
+                                className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 py-3 text-lg rounded-lg transition"
+                            >
+                                Stop & Save Session
+                            </button>
                         </div>
                     )}
                 </div>
+
+                {/* Stats Panel */}
+                <div className="bg-card rounded-lg border border-border p-6">
+                    <h2 className="text-xl font-bold text-foreground mb-4">This Week</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Total Study Time</p>
+                            <p className="text-3xl font-bold text-primary">{stats?.totalHours || 0}h</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Sessions Completed</p>
+                            <p className="text-2xl font-bold text-green-600">{stats?.sessionCount || 0}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">Average per Session</p>
+                            <p className="text-2xl font-bold text-purple-600">
+                                {stats && stats.sessionCount > 0
+                                    ? (stats.totalMinutes / stats.sessionCount).toFixed(0)
+                                    : 0}min
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Subject Distribution */}
+            {stats && stats.subjectDistribution.length > 0 && (
+                <div className="bg-card rounded-lg border border-border p-6 mb-6">
+                    <h2 className="text-xl font-bold text-foreground mb-4">Subject-wise Time Distribution</h2>
+                    <div className="space-y-3">
+                        {stats.subjectDistribution.map((subject) => (
+                            <div key={subject.subjectId}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className="w-3 h-3 rounded-full"
+                                            style={{ backgroundColor: subject.subjectColor }}
+                                        />
+                                        <span className="font-medium text-foreground">{subject.subjectName}</span>
+                                    </div>
+                                    <span className="text-sm text-muted-foreground">
+                                        {(subject.totalMinutes / 60).toFixed(1)}h
+                                    </span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                    <div
+                                        className="h-2 rounded-full"
+                                        style={{
+                                            width: `${(subject.totalMinutes / (stats.totalMinutes || 1)) * 100}%`,
+                                            backgroundColor: subject.subjectColor,
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Recent Sessions */}
+            <div className="bg-card rounded-lg border border-border p-6">
+                <h2 className="text-xl font-bold text-foreground mb-4">Recent Sessions</h2>
+                {sessions.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No study sessions yet. Start your first session!</p>
+                ) : (
+                    <div className="space-y-3">
+                        {sessions.slice(0, 10).map((session) => (
+                            <div key={session._id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className="w-3 h-3 rounded-full"
+                                        style={{ backgroundColor: session.subjectId.color }}
+                                    />
+                                    <div>
+                                        <p className="font-medium text-foreground">{session.subjectId.name}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {new Date(session.date).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-semibold text-primary">{session.duration} min</p>
+                                    {session.focusLevel && (
+                                        <p className="text-xs text-muted-foreground capitalize">{session.focusLevel} focus</p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );

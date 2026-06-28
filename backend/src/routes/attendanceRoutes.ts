@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     markAttendance,
+    syncAttendance,
     getAttendance,
     getAttendanceStats,
     updateAttendance,
@@ -9,6 +10,9 @@ import {
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
+
+// Bulk attendance sync (must be before /:id routes to avoid conflict)
+router.post('/attendance/sync', protect, syncAttendance);
 
 // Attendance routes (attached to subjects)
 router.post('/:id/attendance', protect, markAttendance);

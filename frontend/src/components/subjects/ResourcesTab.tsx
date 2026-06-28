@@ -57,6 +57,7 @@ const ResourcesTab: React.FC<ResourcesTabProps> = ({ subjectId, onUpdate }) => {
 
         try {
             let fileUrl = '';
+            let firebaseStoragePath = '';
 
             // Upload file if present
             if (file) {
@@ -66,11 +67,13 @@ const ResourcesTab: React.FC<ResourcesTabProps> = ({ subjectId, onUpdate }) => {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 fileUrl = uploadRes.data.url;
+                firebaseStoragePath = uploadRes.data.storagePath || '';
             }
 
             await api.post(`/subjects/${subjectId}/resources`, {
                 ...formData,
                 fileUrl: fileUrl || undefined,
+                firebaseStoragePath: firebaseStoragePath || undefined,
             });
 
             toast.success('Resource added!');
@@ -178,11 +181,11 @@ const ResourcesTab: React.FC<ResourcesTabProps> = ({ subjectId, onUpdate }) => {
                                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                                 />
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    Supports PDF, DOC, PPT, images
+                                    Supports PDF, DOC, PPT, images (max 50MB)
                                 </p>
                             </div>
                             <Button type="submit" className="w-full" disabled={uploading}>
-                                {uploading ? 'Uploading...' : 'Add Resource'}
+                                {uploading ? 'Uploading to cloud...' : 'Add Resource'}
                             </Button>
                         </form>
                     </DialogContent>

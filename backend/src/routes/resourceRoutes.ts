@@ -14,8 +14,11 @@ import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for temp file uploads (files go to Firebase Storage then temp is deleted)
+const upload = multer({
+    dest: 'uploads/',
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+});
 
 // Resource routes (attached to subjects)
 router.post('/:id/resources', protect, createResource);

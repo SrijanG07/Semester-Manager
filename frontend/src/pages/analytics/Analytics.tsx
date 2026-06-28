@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import api from '../../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface SubjectPerformance {
@@ -42,7 +42,7 @@ const Analytics: React.FC = () => {
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <DashboardLayout title="Analytics" subtitle="Track your academic progress">
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <p className="text-gray-600">Loading analytics...</p>
                 </div>
@@ -64,8 +64,8 @@ const Analytics: React.FC = () => {
     })) || [];
 
     return (
-        <DashboardLayout>
-            <div className="p-6">
+        <DashboardLayout title="Analytics" subtitle="Track your academic progress">
+            <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-6">📊 Analytics</h1>
 
                 {/* Study Time Distribution */}

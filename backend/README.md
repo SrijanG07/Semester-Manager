@@ -23,7 +23,7 @@ See main README.md for complete API endpoint documentation.
 ```
 backend/
 ├── src/
-│   ├── config/         # Database and external service configs
+│   ├── config/         # Database and Firebase config
 │   ├── controllers/    # Request handlers
 │   ├── middleware/     # Auth middleware
 │   ├── models/         # Mongoose schemas
@@ -42,6 +42,5 @@ Required:
 - `JWT_SECRET` - Secret key for JWT tokens
 
 Optional:
-- `CLOUDINARY_CLOUD_NAME` - For file uploads
-- `CLOUDINARY_API_KEY` - For file uploads
-- `CLOUDINARY_API_SECRET` - For file uploads
+- `FIREBASE_STORAGE_BUCKET` - Firebase Storage bucket name (e.g. `your-project.appspot.com`)
+- `FIREBASE_SERVICE_ACCOUNT_PATH` - Path to Firebase service account JSON key file

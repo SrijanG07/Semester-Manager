@@ -120,8 +120,14 @@ export const calculateScore = async (req: AuthRequest, res: Response) => {
             }
         }
 
+        // Calculate how much of the grade has been entered
+        const totalWeightEntered = gradingScheme.components
+            .filter((comp: any) => scores.find((s: any) => s.componentName === comp.name))
+            .reduce((sum: number, comp: any) => sum + comp.weightage, 0);
+
         res.json({
-            currentTotal: currentTotal.toFixed(2),
+            currentScore: parseFloat(currentTotal.toFixed(2)),
+            totalWeightEntered: parseFloat(totalWeightEntered.toFixed(2)),
             breakdown,
         });
     } catch (error: any) {

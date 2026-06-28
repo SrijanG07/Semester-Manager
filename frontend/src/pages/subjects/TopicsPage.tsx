@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import DashboardLayout from '../../components/DashboardLayout';
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import api from '../../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface Topic {
     _id: string;
@@ -98,7 +98,7 @@ const TopicsPage: React.FC = () => {
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <DashboardLayout title="Topics" subtitle="Manage your study topics">
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <p className="text-gray-600">Loading topics...</p>
                 </div>
@@ -107,8 +107,8 @@ const TopicsPage: React.FC = () => {
     }
 
     return (
-        <DashboardLayout>
-            <div className="p-6">
+        <DashboardLayout title="Topics" subtitle="Manage your study topics">
+            <div>
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold text-gray-900">📚 Topics</h1>
                     <button onClick={() => setShowModal(true)} className="btn btn-primary">

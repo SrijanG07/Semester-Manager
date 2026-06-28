@@ -9,25 +9,72 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
+import api from "../../utils/api";
+
+interface DayData {
+  day: string;
+  hours: number;
+}
 
 export function StudyTimeChart() {
-  const [data, setData] = useState([
-    { day: "Mon", hours: 0 },
-    { day: "Tue", hours: 0 },
-    { day: "Wed", hours: 0 },
-    { day: "Thu", hours: 0 },
-    { day: "Fri", hours: 0 },
-    { day: "Sat", hours: 0 },
-    { day: "Sun", hours: 0 },
-  ]);
+  const [data, setData] = useState<DayData[]>([]);
   const [totalHours, setTotalHours] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Fetch real study session data from backend
   useEffect(() => {
-    // This will be connected to your study sessions API
-    const total = data.reduce((sum, day) => sum + day.hours, 0);
-    setTotalHours(total);
-  }, [data]);
+    const fetchStudyData = async () => {
+      try {
+        const response = await api.get('/study-sessions/stats?period=week');
+        const { dailyStats, totalHours: total } = response.data;
+
+        // Build last 7 days with real data
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const chartData: DayData[] = [];
+
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateKey = date.toISOString().split('T')[0];
+          const dayName = dayNames[date.getDay()];
+          const minutes = dailyStats?.[dateKey] || 0;
+
+          chartData.push({
+            day: dayName,
+            hours: parseFloat((minutes / 60).toFixed(1)),
+          });
+        }
+
+        setData(chartData);
+        setTotalHours(parseFloat(total || '0'));
+      } catch (error) {
+        console.error('Failed to fetch study stats:', error);
+        // Fallback to empty week
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date().getDay();
+        const chartData: DayData[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const idx = (today - i + 7) % 7;
+          chartData.push({ day: dayNames[idx], hours: 0 });
+        }
+        setData(chartData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudyData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Study Hours This Week</CardTitle>
+          <CardDescription>Loading...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card>

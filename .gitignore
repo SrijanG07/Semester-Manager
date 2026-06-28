@@ -11,6 +11,13 @@ frontend/node_modules/
 backend/.env
 frontend/.env
 
+# Service account / credentials files
+firebase-service-account.json
+*-service-account.json
+
+# Temp uploads
+backend/uploads/
+
 # Build outputs
 dist/
 build/

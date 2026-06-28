@@ -15,15 +15,38 @@ interface Subject {
   instructor?: string;
 }
 
+interface SubjectWithScore extends Subject {
+  score: number;
+  scoreEntered: number;
+}
+
 export function SubjectsOverview() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjects, setSubjects] = useState<SubjectWithScore[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         const response = await api.get('/subjects');
-        setSubjects(response.data.slice(0, 4)); // Show only first 4
+        const rawSubjects: Subject[] = response.data.slice(0, 4); // Show only first 4
+
+        // Fetch scores for each subject
+        const withScores = await Promise.all(
+          rawSubjects.map(async (subject) => {
+            try {
+              const scoreRes = await api.get(`/subjects/${subject._id}/calculate`);
+              return {
+                ...subject,
+                score: scoreRes.data?.currentScore || 0,
+                scoreEntered: scoreRes.data?.totalWeightEntered || 0,
+              };
+            } catch {
+              return { ...subject, score: 0, scoreEntered: 0 };
+            }
+          })
+        );
+
+        setSubjects(withScores);
       } catch (error) {
         console.error('Failed to fetch subjects:', error);
       } finally {
@@ -92,22 +115,27 @@ export function SubjectsOverview() {
       <CardContent>
         <div className="space-y-4">
           {subjects.map((subject) => (
-            <div key={subject._id} className="flex items-center gap-4">
-              <div
-                className="w-2 h-12 rounded-full"
-                style={{ backgroundColor: subject.color || '#3b82f6' }}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="font-medium text-sm truncate">{subject.name}</p>
-                  <span className="text-xs text-muted-foreground">0%</span>
+            <Link key={subject._id} to={`/subjects/${subject._id}`} className="block">
+              <div className="flex items-center gap-4 hover:bg-accent/50 -mx-2 px-2 py-1 rounded-lg transition-colors">
+                <div
+                  className="w-2 h-12 rounded-full"
+                  style={{ backgroundColor: subject.color || '#3b82f6' }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="font-medium text-sm truncate">{subject.name}</p>
+                    <span className="text-xs text-muted-foreground">
+                      {subject.score > 0 ? `${subject.score.toFixed(1)}%` : '—'}
+                    </span>
+                  </div>
+                  <Progress value={subject.score} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {subject.code} • {subject.credits} credits
+                    {subject.scoreEntered > 0 && ` • ${subject.scoreEntered}% graded`}
+                  </p>
                 </div>
-                <Progress value={0} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {subject.code} • {subject.credits} credits
-                </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </CardContent>

@@ -40,7 +40,7 @@ Academic Manager helps students track academic performance, manage study session
 - **MongoDB** with **Mongoose** ODM
 - **JWT** for authentication
 - **bcryptjs** for password hashing
-- **Cloudinary** for file uploads
+- **Supabase Storage** for file uploads
 
 ## 📁 Project Structure
 
@@ -48,7 +48,7 @@ Academic Manager helps students track academic performance, manage study session
 academic-manager/
 ├── backend/              # Express API server
 │   ├── src/
-│   │   ├── config/      # Database and Cloudinary config
+│   │   ├── config/      # Database and Supabase config
 │   │   ├── controllers/ # Route controllers
 │   │   ├── middleware/  # Auth middleware
 │   │   ├── models/      # Mongoose models
@@ -104,10 +104,9 @@ academic-manager/
    
    JWT_SECRET=your-super-secret-jwt-key-change-this
    
-   # Cloudinary (optional - for file uploads)
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
+   # Supabase Storage
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    ```
 
 4. **Setup Frontend Environment**
@@ -188,9 +187,10 @@ npm start
 - `DELETE /api/topics/:id` - Delete topic
 
 ### Attendance
-- `GET /api/attendance/:subjectId` - Get attendance
-- `POST /api/attendance/:subjectId` - Mark attendance
-- `GET /api/attendance/:subjectId/stats` - Get stats
+- `GET /api/subjects/:id/attendance` - Get attendance records
+- `POST /api/subjects/:id/attendance` - Mark single attendance entry
+- `POST /api/subjects/attendance/sync` - Bulk set attendance count
+- `GET /api/subjects/:id/attendance/stats` - Get attendance stats
 
 ## 📊 Database Models
 
@@ -202,7 +202,7 @@ npm start
 - **Deadline** - Assignments and exam deadlines
 - **Topic** - Subject topics with mastery status
 - **Attendance** - Class attendance records
-- **Resource** - Study materials and notes (Cloudinary integration)
+- **Resource** - Study materials and notes (Supabase Storage integration)
 
 ## 🎨 Features in Detail
 
@@ -240,7 +240,7 @@ npm start
 - Percentage calculator
 - "Classes needed" for target percentage
 - Subject-wise tracking
-- Attendance history
+- Manual entry (single class or bulk count)
 
 ## 🔒 Security
 

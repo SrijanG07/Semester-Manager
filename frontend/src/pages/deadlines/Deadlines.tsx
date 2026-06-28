@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
 import api from '../../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 
 interface Deadline {
@@ -110,7 +110,7 @@ const Deadlines: React.FC = () => {
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <DashboardLayout title="Deadlines" subtitle="Manage your upcoming deadlines">
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" viewBox="0 0 24 24">
@@ -128,10 +128,10 @@ const Deadlines: React.FC = () => {
     const completedDeadlines = deadlines.filter(d => d.completed);
 
     return (
-        <DashboardLayout>
-            <div className="p-6">
+        <DashboardLayout title="Deadlines" subtitle="Manage your upcoming deadlines">
+            <div>
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">📅 Deadlines</h1>
+                    <h2 className="text-xl font-bold text-foreground">📅 All Deadlines</h2>
                     <button onClick={() => setShowModal(true)} className="btn btn-primary flex items-center gap-2">
                         <span>+</span> Add Deadline
                     </button>
