@@ -268,7 +268,7 @@ ISC
 
 ## 👤 Author
 
-Your Name
+Srijan Gupta
 
 ## 🤝 Contributing
 
