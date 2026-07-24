@@ -6,9 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, ExternalLink, Trash2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Plus, FileText, ExternalLink, Trash2, Sparkles, Brain, Lightbulb } from 'lucide-react';
 import api from '@/utils/api';
 import { toast } from 'sonner';
+import AiOutputSheet from '@/components/ai/AiOutputSheet';
+import QuizDialog from '@/components/ai/QuizDialog';
+import FlashcardDialog from '@/components/ai/FlashcardDialog';
 
 interface Resource {
     _id: string;
@@ -17,6 +21,16 @@ interface Resource {
     fileUrl?: string;
     externalLink?: string;
     completed: boolean;
+}
+
+interface AiOutput {
+    _id: string;
+    resourceId: string;
+    type: 'summary' | 'explanation' | 'quiz' | 'flashcards';
+    content: any;
+    modelUsed: string;
+    createdAt: string;
+    sourceOutputId?: string;
 }
 
 interface ResourcesTabProps {
@@ -35,6 +49,16 @@ const ResourcesTab: React.FC<ResourcesTabProps> = ({ subjectId, onUpdate }) => {
     });
     const [uploading, setUploading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
+
+    // AI state
+    const [aiSheetOpen, setAiSheetOpen] = useState(false);
+    const [aiSheetResourceId, setAiSheetResourceId] = useState('');
+    const [aiSheetResourceTitle, setAiSheetResourceTitle] = useState('');
+    const [aiSheetType, setAiSheetType] = useState<'summary' | 'explanation'>('summary');
+    const [quizDialogOpen, setQuizDialogOpen] = useState(false);
+    const [quizData, setQuizData] = useState<AiOutput | null>(null);
+    const [flashcardDialogOpen, setFlashcardDialogOpen] = useState(false);
+    const [flashcardData, setFlashcardData] = useState<AiOutput | null>(null);
 
     useEffect(() => {
         fetchResources();
@@ -118,136 +142,211 @@ const ResourcesTab: React.FC<ResourcesTabProps> = ({ subjectId, onUpdate }) => {
         }
     };
 
+    const openAiSheet = (resource: Resource, type: 'summary' | 'explanation') => {
+        setAiSheetResourceId(resource._id);
+        setAiSheetResourceTitle(resource.title);
+        setAiSheetType(type);
+        setAiSheetOpen(true);
+    };
+
+    const handleOpenQuiz = (output: AiOutput) => {
+        setQuizData(output);
+        setQuizDialogOpen(true);
+    };
+
+    const handleOpenFlashcards = (output: AiOutput) => {
+        setFlashcardData(output);
+        setFlashcardDialogOpen(true);
+    };
+
     if (loading) {
         return <div className="text-center py-8 text-muted-foreground">Loading...</div>;
     }
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Resources</CardTitle>
-                <Dialog open={showAddResource} onOpenChange={setShowAddResource}>
-                    <DialogTrigger asChild>
-                        <Button size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Resource
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add Resource</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleAddResource} className="space-y-4">
-                            <div>
-                                <Label>Title *</Label>
-                                <Input
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    placeholder="e.g., Linked List Notes"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Label>Type *</Label>
-                                <Select
-                                    value={formData.type}
-                                    onValueChange={(value: Resource['type']) => setFormData({ ...formData, type: value })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Class Notes">Class Notes</SelectItem>
-                                        <SelectItem value="PYQ">PYQ</SelectItem>
-                                        <SelectItem value="Book">Book</SelectItem>
-                                        <SelectItem value="Personal Notes">Personal Notes</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>External Link (optional)</Label>
-                                <Input
-                                    value={formData.externalLink}
-                                    onChange={(e) => setFormData({ ...formData, externalLink: e.target.value })}
-                                    placeholder="https://..."
-                                    type="url"
-                                />
-                            </div>
-                            <div>
-                                <Label>Upload File (optional)</Label>
-                                <Input
-                                    type="file"
-                                    accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-                                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                />
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Supports PDF, DOC, PPT, images (max 50MB)
-                                </p>
-                            </div>
-                            <Button type="submit" className="w-full" disabled={uploading}>
-                                {uploading ? 'Uploading to cloud...' : 'Add Resource'}
+        <>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Resources</CardTitle>
+                    <Dialog open={showAddResource} onOpenChange={setShowAddResource}>
+                        <DialogTrigger asChild>
+                            <Button size="sm">
+                                <Plus className="w-4 h-4 mr-2" />
+                                Add Resource
                             </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            </CardHeader>
-            <CardContent>
-                {resources.length === 0 ? (
-                    <div className="text-center py-8">
-                        <p className="text-muted-foreground mb-4">No resources yet</p>
-                        <Button onClick={() => setShowAddResource(true)}>Add Your First Resource</Button>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {resources.map((resource) => (
-                            <div
-                                key={resource._id}
-                                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
-                                        <FileText className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h4 className="font-medium">{resource.title}</h4>
-                                            {(resource.fileUrl || resource.externalLink) && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-6 w-6"
-                                                    onClick={() => openResource(resource)}
-                                                >
-                                                    <ExternalLink className="w-3 h-3" />
-                                                </Button>
-                                            )}
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add Resource</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleAddResource} className="space-y-4">
+                                <div>
+                                    <Label>Title *</Label>
+                                    <Input
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                        placeholder="e.g., Linked List Notes"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Type *</Label>
+                                    <Select
+                                        value={formData.type}
+                                        onValueChange={(value: Resource['type']) => setFormData({ ...formData, type: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Class Notes">Class Notes</SelectItem>
+                                            <SelectItem value="PYQ">PYQ</SelectItem>
+                                            <SelectItem value="Book">Book</SelectItem>
+                                            <SelectItem value="Personal Notes">Personal Notes</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label>External Link (optional)</Label>
+                                    <Input
+                                        value={formData.externalLink}
+                                        onChange={(e) => setFormData({ ...formData, externalLink: e.target.value })}
+                                        placeholder="https://..."
+                                        type="url"
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Upload File (optional)</Label>
+                                    <Input
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                    />
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        Supports PDF, DOC, PPT, images (max 50MB)
+                                    </p>
+                                </div>
+                                <Button type="submit" className="w-full" disabled={uploading}>
+                                    {uploading ? 'Uploading to cloud...' : 'Add Resource'}
+                                </Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </CardHeader>
+                <CardContent>
+                    {resources.length === 0 ? (
+                        <div className="text-center py-8">
+                            <p className="text-muted-foreground mb-4">No resources yet</p>
+                            <Button onClick={() => setShowAddResource(true)}>Add Your First Resource</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {resources.map((resource) => (
+                                <div
+                                    key={resource._id}
+                                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                                            <FileText className="w-5 h-5 text-muted-foreground" />
                                         </div>
-                                        <p className="text-sm text-muted-foreground">{resource.type}</p>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="font-medium">{resource.title}</h4>
+                                                {(resource.fileUrl || resource.externalLink) && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-6 w-6"
+                                                        onClick={() => openResource(resource)}
+                                                    >
+                                                        <ExternalLink className="w-3 h-3" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-muted-foreground">{resource.type}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        {/* AI action buttons — only show for resources with files */}
+                                        {resource.fileUrl && (
+                                            <>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                            onClick={() => openAiSheet(resource, 'summary')}
+                                                        >
+                                                            <Brain className="w-4 h-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Summarize with AI</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+                                                            onClick={() => openAiSheet(resource, 'explanation')}
+                                                        >
+                                                            <Lightbulb className="w-4 h-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Explain with AI</TooltipContent>
+                                                </Tooltip>
+                                            </>
+                                        )}
+                                        <Badge
+                                            variant={resource.completed ? "default" : "secondary"}
+                                            className="cursor-pointer"
+                                            onClick={() => toggleCompletion(resource._id)}
+                                        >
+                                            {resource.completed ? 'Completed' : 'Pending'}
+                                        </Badge>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() => handleDelete(resource._id)}
+                                        >
+                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Badge
-                                        variant={resource.completed ? "default" : "secondary"}
-                                        className="cursor-pointer"
-                                        onClick={() => toggleCompletion(resource._id)}
-                                    >
-                                        {resource.completed ? 'Completed' : 'Pending'}
-                                    </Badge>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={() => handleDelete(resource._id)}
-                                    >
-                                        <Trash2 className="w-4 h-4 text-red-500" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                            ))}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* AI Sheet */}
+            <AiOutputSheet
+                open={aiSheetOpen}
+                onOpenChange={setAiSheetOpen}
+                resourceId={aiSheetResourceId}
+                resourceTitle={aiSheetResourceTitle}
+                initialType={aiSheetType}
+                onOpenQuiz={handleOpenQuiz}
+                onOpenFlashcards={handleOpenFlashcards}
+            />
+
+            {/* Quiz Dialog */}
+            <QuizDialog
+                open={quizDialogOpen}
+                onOpenChange={setQuizDialogOpen}
+                quizData={quizData}
+            />
+
+            {/* Flashcard Dialog */}
+            <FlashcardDialog
+                open={flashcardDialogOpen}
+                onOpenChange={setFlashcardDialogOpen}
+                flashcardData={flashcardData}
+            />
+        </>
     );
 };
 

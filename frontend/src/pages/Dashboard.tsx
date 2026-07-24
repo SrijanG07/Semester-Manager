@@ -4,11 +4,13 @@ import { StudyTimeChart } from "@/components/dashboard/StudyTimeChart";
 import { SubjectDistributionChart } from "@/components/dashboard/SubjectDistributionChart";
 import { SubjectsOverview } from "@/components/dashboard/SubjectsOverview";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
-import { BookOpen, Clock, Target, Calendar } from "lucide-react";
+import { BookOpen, Clock, Target, Calendar, Plus, Timer, StickyNote, Brain } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../utils/api";
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({
         subjectsCount: 0,
         studyHours: '0',
@@ -61,10 +63,17 @@ const Dashboard = () => {
         fetchStats();
     }, []);
 
+    const quickActions = [
+        { icon: Plus, label: "New Subject", action: () => navigate('/subjects'), color: "text-primary" },
+        { icon: Timer, label: "Start Timer", action: () => navigate('/study'), color: "text-green-500" },
+        { icon: Calendar, label: "Add Deadline", action: () => navigate('/deadlines'), color: "text-orange-500" },
+        { icon: Brain, label: "Exam Prep", action: () => navigate('/exam-prep'), color: "text-purple-500" },
+    ];
+
     return (
         <DashboardLayout>
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-children">
                 <StatCard
                     title="Active Subjects"
                     value={stats.subjectsCount}
@@ -83,6 +92,7 @@ const Dashboard = () => {
                     value={`${stats.studyHours}h`}
                     subtitle="This week"
                     icon={Clock}
+                    variant="info"
                 />
                 <StatCard
                     title="Upcoming Deadlines"
@@ -92,18 +102,37 @@ const Dashboard = () => {
                 />
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <div className="lg:col-span-2 space-y-6">
+            {/* Quick Actions */}
+            <div className="mb-6">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quick Actions</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger-children">
+                    {quickActions.map((action, i) => (
+                        <button
+                            key={i}
+                            onClick={action.action}
+                            className="quick-action-btn"
+                        >
+                            <action.icon className={`w-5 h-5 ${action.color}`} />
+                            <span className="text-xs font-medium text-foreground">{action.label}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Charts + Overview */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <div className="lg:col-span-2">
                     <StudyTimeChart />
-                    <SubjectsOverview />
                 </div>
-                <div className="lg:col-span-1">
-                    <div className="grid gap-6">
-                        <SubjectDistributionChart />
-                        <AlertsPanel />
-                    </div>
+                <div>
+                    <SubjectDistributionChart />
                 </div>
+            </div>
+
+            {/* Bottom row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <SubjectsOverview />
+                <AlertsPanel />
             </div>
         </DashboardLayout>
     );

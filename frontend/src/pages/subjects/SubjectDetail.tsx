@@ -4,7 +4,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'sonner';
 import PerformanceTab from '@/components/subjects/PerformanceTab';
@@ -12,6 +12,7 @@ import ResourcesTab from '@/components/subjects/ResourcesTab';
 import TopicsTab from '@/components/subjects/TopicsTab';
 import DeadlinesTab from '@/components/subjects/DeadlinesTab';
 import AttendanceTab from '@/components/subjects/AttendanceTab';
+import AiStudyTab from '@/components/subjects/AiStudyTab';
 
 interface Subject {
     _id: string;
@@ -86,7 +87,7 @@ const SubjectDetail: React.FC = () => {
                     late: attendance?.late || 0,
                     total: attendance?.total || 0,
                 },
-                studyTime: 0, // Could be fetched from study sessions if implemented
+                studyTime: 0,
                 resourceCount: resources.length || 0,
                 completedResources: resources.filter((r: any) => r.completed).length || 0,
             });
@@ -111,8 +112,13 @@ const SubjectDetail: React.FC = () => {
     if (loading) {
         return (
             <DashboardLayout title="Loading..." subtitle="">
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-muted-foreground">Loading subject...</p>
+                <div className="space-y-4">
+                    <div className="h-8 w-32 bg-muted rounded animate-pulse" />
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />
+                        ))}
+                    </div>
                 </div>
             </DashboardLayout>
         );
@@ -123,9 +129,9 @@ const SubjectDetail: React.FC = () => {
     }
 
     const getAttendanceStatus = (percentage: number) => {
-        if (percentage >= 75) return { text: 'Above 75% threshold', color: 'text-green-600' };
-        if (percentage >= 60) return { text: 'Below 75% threshold', color: 'text-orange-500' };
-        return { text: 'Critical - Below 60%', color: 'text-red-500' };
+        if (percentage >= 75) return { text: 'Above 75% threshold', color: 'text-success' };
+        if (percentage >= 60) return { text: 'Below 75% threshold', color: 'text-warning' };
+        return { text: 'Critical — Below 60%', color: 'text-destructive' };
     };
 
     const attendanceStatus = getAttendanceStatus(stats.attendance.percentage);
@@ -138,45 +144,46 @@ const SubjectDetail: React.FC = () => {
             {/* Back Button */}
             <Button
                 variant="ghost"
-                className="mb-6 -ml-2"
+                size="sm"
+                className="mb-5 -ml-2 text-muted-foreground h-8"
                 onClick={() => navigate('/subjects')}
             >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
                 Back to Subjects
             </Button>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <Card>
+                <Card className="shadow-none border border-border border-l-[3px] border-l-primary">
                     <CardContent className="p-4">
-                        <p className="text-sm text-blue-600 font-medium mb-1">Current Score</p>
-                        <p className="text-3xl font-bold">{stats.currentScore.toFixed(1)}%</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-primary font-medium mb-1">Current Score</p>
+                        <p className="text-2xl font-semibold">{stats.currentScore.toFixed(1)}%</p>
+                        <p className="text-[11px] text-muted-foreground">
                             out of {stats.totalWeightEntered}% entered
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-none border border-border">
                     <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Attendance</p>
-                        <p className="text-3xl font-bold">{stats.attendance.percentage.toFixed(0)}%</p>
-                        <p className={`text-xs ${attendanceStatus.color}`}>
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Attendance</p>
+                        <p className="text-2xl font-semibold">{stats.attendance.percentage.toFixed(0)}%</p>
+                        <p className={`text-[11px] ${attendanceStatus.color}`}>
                             {attendanceStatus.text}
                         </p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-none border border-border">
                     <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Study Time</p>
-                        <p className="text-3xl font-bold">{stats.studyTime.toFixed(1)}h</p>
-                        <p className="text-xs text-muted-foreground">This month</p>
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Study Time</p>
+                        <p className="text-2xl font-semibold">{stats.studyTime.toFixed(1)}h</p>
+                        <p className="text-[11px] text-muted-foreground">This month</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-none border border-border">
                     <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Resources</p>
-                        <p className="text-3xl font-bold">{stats.resourceCount}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Resources</p>
+                        <p className="text-2xl font-semibold">{stats.resourceCount}</p>
+                        <p className="text-[11px] text-muted-foreground">
                             {stats.completedResources} completed
                         </p>
                     </CardContent>
@@ -185,9 +192,13 @@ const SubjectDetail: React.FC = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 bg-muted/50">
                     <TabsTrigger value="performance">Performance</TabsTrigger>
                     <TabsTrigger value="resources">Resources</TabsTrigger>
+                    <TabsTrigger value="ai-study" className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        AI Study
+                    </TabsTrigger>
                     <TabsTrigger value="topics">Topics</TabsTrigger>
                     <TabsTrigger value="deadlines">Deadlines</TabsTrigger>
                     <TabsTrigger value="attendance">Attendance</TabsTrigger>
@@ -198,6 +209,9 @@ const SubjectDetail: React.FC = () => {
                 </TabsContent>
                 <TabsContent value="resources">
                     <ResourcesTab subjectId={id!} onUpdate={refreshStats} />
+                </TabsContent>
+                <TabsContent value="ai-study">
+                    <AiStudyTab subjectId={id!} />
                 </TabsContent>
                 <TabsContent value="topics">
                     <TopicsTab subjectId={id!} />

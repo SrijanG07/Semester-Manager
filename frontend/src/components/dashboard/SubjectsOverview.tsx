@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
 import { Progress } from "@/components/ui/progress";
@@ -59,27 +59,30 @@ export function SubjectsOverview() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Subject Overview</CardTitle>
-          <CardDescription>Loading...</CardDescription>
+      <Card className="border border-border shadow-none">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Subject Overview</CardTitle>
         </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-14 bg-muted rounded-lg animate-pulse" />
+            ))}
+          </div>
+        </CardContent>
       </Card>
     );
   }
 
   if (subjects.length === 0) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="border border-border shadow-none">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Subject Overview</CardTitle>
-              <CardDescription>No subjects yet</CardDescription>
-            </div>
+            <CardTitle className="text-base font-semibold">Subject Overview</CardTitle>
             <Link to="/subjects">
-              <Button size="sm">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button size="sm" variant="outline" className="h-8 text-xs">
+                <Plus className="w-3.5 h-3.5 mr-1.5" />
                 Add Subject
               </Button>
             </Link>
@@ -87,11 +90,11 @@ export function SubjectsOverview() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-3">
               Start by adding your first subject
             </p>
             <Link to="/subjects">
-              <Button>Add Your First Subject</Button>
+              <Button size="sm">Add Your First Subject</Button>
             </Link>
           </div>
         </CardContent>
@@ -100,36 +103,35 @@ export function SubjectsOverview() {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border border-border shadow-none">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Subject Overview</CardTitle>
-            <CardDescription>{subjects.length} subjects enrolled</CardDescription>
-          </div>
+          <CardTitle className="text-base font-semibold">Subject Overview</CardTitle>
           <Link to="/subjects">
-            <Button variant="ghost" size="sm">View all →</Button>
+            <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
+              View all →
+            </Button>
           </Link>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {subjects.map((subject) => (
-            <Link key={subject._id} to={`/subjects/${subject._id}`} className="block">
-              <div className="flex items-center gap-4 hover:bg-accent/50 -mx-2 px-2 py-1 rounded-lg transition-colors">
+            <Link key={subject._id} to={`/subjects/${subject._id}`} className="block group">
+              <div className="flex items-center gap-3 p-2.5 -mx-2.5 rounded-lg transition-colors group-hover:bg-accent/50">
                 <div
-                  className="w-2 h-12 rounded-full"
-                  style={{ backgroundColor: subject.color || '#3b82f6' }}
+                  className="w-1.5 h-10 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: subject.color || '#7c3aed' }}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-medium text-sm truncate">{subject.name}</p>
-                    <span className="text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-sm font-medium truncate text-foreground">{subject.name}</p>
+                    <span className="text-xs font-medium text-muted-foreground ml-2">
                       {subject.score > 0 ? `${subject.score.toFixed(1)}%` : '—'}
                     </span>
                   </div>
-                  <Progress value={subject.score} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <Progress value={subject.score} className="h-1.5" />
+                  <p className="text-[11px] text-muted-foreground mt-1">
                     {subject.code} • {subject.credits} credits
                     {subject.scoreEntered > 0 && ` • ${subject.scoreEntered}% graded`}
                   </p>

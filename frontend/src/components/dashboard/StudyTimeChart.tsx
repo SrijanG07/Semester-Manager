@@ -7,7 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import api from "../../utils/api";
 
@@ -67,32 +67,38 @@ export function StudyTimeChart() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Study Hours This Week</CardTitle>
-          <CardDescription>Loading...</CardDescription>
+      <Card className="border border-border shadow-none">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold">Study Hours This Week</CardTitle>
         </CardHeader>
+        <CardContent>
+          <div className="h-56 flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Study Hours This Week</CardTitle>
-        <CardDescription>Total: {totalHours.toFixed(1)} hours</CardDescription>
+    <Card className="border border-border shadow-none">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-semibold">Study Hours This Week</CardTitle>
+          <span className="text-sm text-muted-foreground">{totalHours.toFixed(1)}h total</span>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
                 <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(221, 83%, 53%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(262, 80%, 55%)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="hsl(262, 80%, 55%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis
                 dataKey="day"
                 axisLine={false}
@@ -104,6 +110,7 @@ export function StudyTimeChart() {
                 tickLine={false}
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                 tickFormatter={(value) => `${value}h`}
+                width={35}
               />
               <Tooltip
                 contentStyle={{
@@ -111,13 +118,14 @@ export function StudyTimeChart() {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px",
                   fontSize: "12px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 }}
                 formatter={(value: number | undefined) => [`${value ?? 0} hours`, "Study Time"]}
               />
               <Area
                 type="monotone"
                 dataKey="hours"
-                stroke="hsl(221, 83%, 53%)"
+                stroke="hsl(262, 80%, 55%)"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorHours)"
@@ -126,7 +134,7 @@ export function StudyTimeChart() {
           </ResponsiveContainer>
         </div>
         {totalHours === 0 && (
-          <p className="text-center text-sm text-muted-foreground mt-4">
+          <p className="text-center text-sm text-muted-foreground mt-3">
             Start tracking study sessions to see your progress
           </p>
         )}

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Check, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import api from '../../utils/api';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
@@ -90,35 +99,22 @@ const Deadlines: React.FC = () => {
         }
     };
 
-    const getPriorityColor = (priority: string) => {
+    const getPriorityBadge = (priority: string) => {
         switch (priority) {
-            case 'overdue': return 'bg-black text-white';
-            case 'urgent': return 'bg-red-100 text-red-800';
-            case 'soon': return 'bg-yellow-100 text-yellow-800';
-            default: return 'bg-green-100 text-green-800';
-        }
-    };
-
-    const getPriorityIcon = (priority: string) => {
-        switch (priority) {
-            case 'overdue': return '⚫';
-            case 'urgent': return '🔴';
-            case 'soon': return '🟡';
-            default: return '🟢';
+            case 'overdue': return { className: 'bg-foreground text-background', label: 'OVERDUE' };
+            case 'urgent': return { className: 'bg-destructive/10 text-destructive', label: 'URGENT' };
+            case 'soon': return { className: 'bg-warning/10 text-warning', label: 'SOON' };
+            default: return { className: 'bg-success/10 text-success', label: 'UPCOMING' };
         }
     };
 
     if (loading) {
         return (
             <DashboardLayout title="Deadlines" subtitle="Manage your upcoming deadlines">
-                <div className="flex items-center justify-center min-h-[60vh]">
-                    <div className="text-center">
-                        <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        <p className="text-gray-600">Loading deadlines...</p>
-                    </div>
+                <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 bg-muted rounded-xl animate-pulse" />
+                    ))}
                 </div>
             </DashboardLayout>
         );
@@ -129,197 +125,194 @@ const Deadlines: React.FC = () => {
 
     return (
         <DashboardLayout title="Deadlines" subtitle="Manage your upcoming deadlines">
-            <div>
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-foreground">📅 All Deadlines</h2>
-                    <button onClick={() => setShowModal(true)} className="btn btn-primary flex items-center gap-2">
-                        <span>+</span> Add Deadline
-                    </button>
-                </div>
+            <div className="flex justify-between items-center mb-6">
+                <p className="text-sm text-muted-foreground">
+                    {upcomingDeadlines.length} upcoming • {completedDeadlines.length} completed
+                </p>
+                <Button size="sm" className="h-9" onClick={() => setShowModal(true)}>
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    Add Deadline
+                </Button>
+            </div>
 
-                {/* Upcoming Deadlines */}
-                <div className="card mb-6">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Upcoming ({upcomingDeadlines.length})</h2>
+            {/* Upcoming Deadlines */}
+            <Card className="shadow-none border border-border mb-4">
+                <CardContent className="p-5">
+                    <h2 className="font-semibold text-foreground mb-4">Upcoming ({upcomingDeadlines.length})</h2>
                     {upcomingDeadlines.length === 0 ? (
-                        <p className="text-gray-600 text-center py-8">No upcoming deadlines. You're all caught up! 🎉</p>
+                        <p className="text-sm text-muted-foreground text-center py-8">No upcoming deadlines. You're all caught up!</p>
                     ) : (
                         <div className="space-y-3">
-                            {upcomingDeadlines.map((deadline) => (
-                                <div key={deadline._id} className="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:shadow-md transition">
-                                    <div className="flex items-start gap-3 flex-1">
+                            {upcomingDeadlines.map((deadline) => {
+                                const badge = getPriorityBadge(deadline.priority);
+                                return (
+                                    <div key={deadline._id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                                         <div
-                                            className="w-1 h-16 rounded-full mt-1"
+                                            className="w-1 h-14 rounded-full mt-0.5 flex-shrink-0"
                                             style={{ backgroundColor: deadline.subjectId.color }}
                                         />
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(deadline.priority)}`}>
-                                                    {getPriorityIcon(deadline.priority)} {deadline.priority.toUpperCase()}
-                                                </span>
-                                                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                                                <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 border-0", badge.className)}>
+                                                    {badge.label}
+                                                </Badge>
+                                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-primary/5 text-primary border-0">
                                                     {deadline.type}
-                                                </span>
+                                                </Badge>
                                             </div>
-                                            <h3 className="font-bold text-gray-900 text-lg">{deadline.title}</h3>
-                                            <p className="text-sm text-gray-600 mb-1">{deadline.subjectId.name}</p>
+                                            <h3 className="font-medium text-foreground">{deadline.title}</h3>
+                                            <p className="text-xs text-muted-foreground">{deadline.subjectId.name}</p>
                                             {deadline.description && (
-                                                <p className="text-sm text-gray-500">{deadline.description}</p>
+                                                <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{deadline.description}</p>
                                             )}
-                                            <p className="text-sm text-gray-700 mt-2">
-                                                📅 Due: {format(new Date(deadline.dueDate), 'MMM dd, yyyy')}
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Due: {format(new Date(deadline.dueDate), 'MMM dd, yyyy')}
                                                 {deadline.dueTime && ` at ${deadline.dueTime}`}
                                             </p>
                                         </div>
+                                        <div className="flex gap-1.5 flex-shrink-0">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
+                                                onClick={() => toggleComplete(deadline._id)}
+                                            >
+                                                <Check className="w-4 h-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                onClick={() => deleteDeadline(deadline._id)}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => toggleComplete(deadline._id)}
-                                            className="px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition text-sm"
-                                        >
-                                            ✓ Complete
-                                        </button>
-                                        <button
-                                            onClick={() => deleteDeadline(deadline._id)}
-                                            className="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
-                </div>
+                </CardContent>
+            </Card>
 
-                {/* Completed Deadlines */}
-                {completedDeadlines.length > 0 && (
-                    <div className="card">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Completed ({completedDeadlines.length})</h2>
+            {/* Completed Deadlines */}
+            {completedDeadlines.length > 0 && (
+                <Card className="shadow-none border border-border">
+                    <CardContent className="p-5">
+                        <h2 className="font-semibold text-foreground mb-4">Completed ({completedDeadlines.length})</h2>
                         <div className="space-y-2">
                             {completedDeadlines.map((deadline) => (
-                                <div key={deadline._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg opacity-60">
+                                <div key={deadline._id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 opacity-60">
                                     <div className="flex items-center gap-3">
                                         <div
-                                            className="w-1 h-12 rounded-full"
+                                            className="w-1 h-10 rounded-full"
                                             style={{ backgroundColor: deadline.subjectId.color }}
                                         />
                                         <div>
-                                            <h3 className="font-medium text-gray-900 line-through">{deadline.title}</h3>
-                                            <p className="text-sm text-gray-600">{deadline.subjectId.name}</p>
+                                            <h3 className="text-sm font-medium text-foreground line-through">{deadline.title}</h3>
+                                            <p className="text-xs text-muted-foreground">{deadline.subjectId.name}</p>
                                         </div>
                                     </div>
-                                    <button
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                         onClick={() => deleteDeadline(deadline._id)}
-                                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition text-sm"
                                     >
-                                        Delete
-                                    </button>
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
                                 </div>
                             ))}
                         </div>
-                    </div>
-                )}
+                    </CardContent>
+                </Card>
+            )}
 
-                {/* Create Deadline Modal */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div className="card max-w-md w-full max-h-[90vh] overflow-y-auto">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold text-gray-900">Create Deadline</h2>
-                                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700 text-2xl">
-                                    ✕
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
-                                    <select
-                                        required
-                                        className="input"
-                                        value={formData.subjectId}
-                                        onChange={(e) => setFormData({ ...formData, subjectId: e.target.value })}
-                                    >
-                                        <option value="">Select subject...</option>
-                                        {subjects.map((subject) => (
-                                            <option key={subject._id} value={subject._id}>{subject.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="input"
-                                        value={formData.title}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                        placeholder="e.g., Assignment 3"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
-                                    <select
-                                        className="input"
-                                        value={formData.type}
-                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                    >
-                                        <option value="Assignment">Assignment</option>
-                                        <option value="Quiz">Quiz</option>
-                                        <option value="Midterm">Midterm</option>
-                                        <option value="Endterm">Endterm</option>
-                                        <option value="Project">Project</option>
-                                    </select>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Due Date *</label>
-                                        <input
-                                            type="date"
-                                            required
-                                            className="input"
-                                            value={formData.dueDate}
-                                            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                                        <input
-                                            type="time"
-                                            className="input"
-                                            value={formData.dueTime}
-                                            onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                    <textarea
-                                        className="input"
-                                        rows={3}
-                                        value={formData.description}
-                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="Additional details..."
-                                    />
-                                </div>
-
-                                <div className="flex gap-3">
-                                    <button type="button" onClick={() => setShowModal(false)} className="flex-1 btn btn-secondary">
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="flex-1 btn btn-primary">
-                                        Create Deadline
-                                    </button>
-                                </div>
-                            </form>
+            {/* Create Deadline Modal */}
+            <Dialog open={showModal} onOpenChange={setShowModal}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Create Deadline</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-1.5">
+                            <Label>Subject *</Label>
+                            <Select value={formData.subjectId} onValueChange={(value) => setFormData({ ...formData, subjectId: value })}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select subject..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {subjects.map((subject) => (
+                                        <SelectItem key={subject._id} value={subject._id}>{subject.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                    </div>
-                )}
-            </div>
+                        <div className="space-y-1.5">
+                            <Label>Title *</Label>
+                            <Input
+                                required
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                placeholder="e.g., Assignment 3"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>Type</Label>
+                            <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Assignment">Assignment</SelectItem>
+                                    <SelectItem value="Quiz">Quiz</SelectItem>
+                                    <SelectItem value="Midterm">Midterm</SelectItem>
+                                    <SelectItem value="Endterm">Endterm</SelectItem>
+                                    <SelectItem value="Project">Project</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label>Due Date *</Label>
+                                <Input
+                                    type="date"
+                                    required
+                                    value={formData.dueDate}
+                                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label>Time</Label>
+                                <Input
+                                    type="time"
+                                    value={formData.dueTime}
+                                    onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>Description</Label>
+                            <textarea
+                                className="flex w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-primary resize-none"
+                                rows={3}
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                placeholder="Additional details..."
+                            />
+                        </div>
+                        <div className="flex gap-3">
+                            <Button type="button" variant="outline" className="flex-1" onClick={() => setShowModal(false)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" className="flex-1">
+                                Create Deadline
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </DashboardLayout>
     );
 };

@@ -40,7 +40,7 @@ const SubjectsList = () => {
         name: "",
         code: "",
         credits: 3,
-        color: "#3b82f6",
+        color: "#7c3aed",
         instructor: "",
     });
 
@@ -122,7 +122,7 @@ const SubjectsList = () => {
             }
             setShowModal(false);
             setEditingSubject(null);
-            setFormData({ name: "", code: "", credits: 3, color: "#3b82f6", instructor: "" });
+            setFormData({ name: "", code: "", credits: 3, color: "#7c3aed", instructor: "" });
             fetchSubjects();
         } catch (error) {
             toast.error(editingSubject ? "Failed to update subject" : "Failed to create subject");
@@ -135,7 +135,7 @@ const SubjectsList = () => {
             name: subject.name,
             code: subject.code || "",
             credits: subject.credits || 3,
-            color: subject.color || "#3b82f6",
+            color: subject.color || "#7c3aed",
             instructor: subject.instructor || "",
         });
         setShowModal(true);
@@ -157,23 +157,22 @@ const SubjectsList = () => {
     };
 
     const getAttendanceColor = (attendance: number) => {
-        if (attendance >= 75) return "text-green-600";
-        if (attendance >= 60) return "text-orange-500";
-        return "text-red-500";
-    };
-
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return "bg-green-500";
-        if (score >= 60) return "bg-blue-500";
-        if (score >= 40) return "bg-yellow-500";
-        return "bg-red-500";
+        if (attendance >= 75) return "text-success";
+        if (attendance >= 60) return "text-warning";
+        return "text-destructive";
     };
 
     if (loading) {
         return (
             <DashboardLayout title="Subjects" subtitle="Manage your courses">
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-muted-foreground">Loading subjects...</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="shadow-none border border-border">
+                            <CardContent className="p-6">
+                                <div className="h-32 bg-muted rounded-lg animate-pulse" />
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             </DashboardLayout>
         );
@@ -183,19 +182,19 @@ const SubjectsList = () => {
         <DashboardLayout title="Subjects" subtitle="Manage your courses">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <p className="text-muted-foreground">
-                    {subjects.length} subjects • Spring 2025
+                <p className="text-sm text-muted-foreground">
+                    {subjects.length} subject{subjects.length !== 1 ? 's' : ''}
                 </p>
                 <Dialog open={showModal} onOpenChange={(open) => {
                     setShowModal(open);
                     if (!open) {
                         setEditingSubject(null);
-                        setFormData({ name: "", code: "", credits: 3, color: "#3b82f6", instructor: "" });
+                        setFormData({ name: "", code: "", credits: 3, color: "#7c3aed", instructor: "" });
                     }
                 }}>
                     <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="w-4 h-4 mr-2" />
+                        <Button size="sm" className="h-9">
+                            <Plus className="w-4 h-4 mr-1.5" />
                             Add Subject
                         </Button>
                     </DialogTrigger>
@@ -204,7 +203,7 @@ const SubjectsList = () => {
                             <DialogTitle>{editingSubject ? "Edit Subject" : "Create New Subject"}</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
+                            <div className="space-y-1.5">
                                 <Label htmlFor="name">Subject Name *</Label>
                                 <Input
                                     id="name"
@@ -215,7 +214,7 @@ const SubjectsList = () => {
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
+                                <div className="space-y-1.5">
                                     <Label htmlFor="code">Subject Code</Label>
                                     <Input
                                         id="code"
@@ -224,7 +223,7 @@ const SubjectsList = () => {
                                         placeholder="e.g., CS201"
                                     />
                                 </div>
-                                <div>
+                                <div className="space-y-1.5">
                                     <Label htmlFor="credits">Credits</Label>
                                     <Input
                                         id="credits"
@@ -236,7 +235,7 @@ const SubjectsList = () => {
                                     />
                                 </div>
                             </div>
-                            <div>
+                            <div className="space-y-1.5">
                                 <Label htmlFor="instructor">Instructor</Label>
                                 <Input
                                     id="instructor"
@@ -245,13 +244,13 @@ const SubjectsList = () => {
                                     placeholder="e.g., Dr. Sarah Johnson"
                                 />
                             </div>
-                            <div>
+                            <div className="space-y-1.5">
                                 <Label htmlFor="color">Color</Label>
                                 <div className="flex gap-2 items-center">
                                     <Input
                                         id="color"
                                         type="color"
-                                        className="w-16 h-10 p-1 cursor-pointer"
+                                        className="w-14 h-10 p-1 cursor-pointer"
                                         value={formData.color}
                                         onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                                     />
@@ -267,11 +266,15 @@ const SubjectsList = () => {
             </div>
 
             {subjects.length === 0 ? (
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
+                <Card className="shadow-none border border-border">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                            <BookOpen className="w-6 h-6 text-primary" />
+                        </div>
                         <p className="text-muted-foreground mb-4">No subjects yet</p>
-                        <Button onClick={() => setShowModal(true)}>Create Your First Subject</Button>
+                        <Button onClick={() => setShowModal(true)} size="sm">
+                            Create Your First Subject
+                        </Button>
                     </CardContent>
                 </Card>
             ) : (
@@ -288,29 +291,30 @@ const SubjectsList = () => {
                         return (
                             <Card
                                 key={subject._id}
-                                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                                className="shadow-none border border-border hover:border-primary/20 transition-colors cursor-pointer group overflow-hidden"
                                 onClick={() => handleCardClick(subject._id)}
                             >
-                                <CardContent className="p-6">
+                                {/* Colored top border */}
+                                <div className="h-1" style={{ backgroundColor: subject.color }} />
+                                <CardContent className="p-5">
                                     {/* Header */}
-                                    <div className="flex items-start justify-between mb-1">
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className="w-3 h-3 rounded-full flex-shrink-0"
-                                                style={{ backgroundColor: subject.color }}
-                                            />
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{subject.name}</h3>
-                                                {subject.code && (
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {subject.code} • {subject.credits} credits
-                                                    </p>
-                                                )}
-                                            </div>
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div>
+                                            <h3 className="font-semibold text-foreground">{subject.name}</h3>
+                                            {subject.code && (
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                    {subject.code} • {subject.credits} credits
+                                                </p>
+                                            )}
+                                            {subject.instructor && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    {subject.instructor}
+                                                </p>
+                                            )}
                                         </div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
@@ -320,7 +324,7 @@ const SubjectsList = () => {
                                                     Edit
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    className="text-red-600"
+                                                    className="text-destructive"
                                                     onClick={(e) => { e.stopPropagation(); handleDelete(subject._id); }}
                                                 >
                                                     <Trash2 className="w-4 h-4 mr-2" />
@@ -330,42 +334,32 @@ const SubjectsList = () => {
                                         </DropdownMenu>
                                     </div>
 
-                                    {/* Instructor */}
-                                    {subject.instructor && (
-                                        <p className="text-sm text-muted-foreground mb-4 ml-6">
-                                            {subject.instructor}
-                                        </p>
-                                    )}
-
                                     {/* Score */}
-                                    <div className="mb-4">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm text-blue-600 font-medium">Current Score</span>
-                                            <span className="font-semibold">{stats.score.toFixed(1)}%</span>
+                                    <div className="mb-3">
+                                        <div className="flex justify-between items-center mb-1.5">
+                                            <span className="text-xs text-primary font-medium">Current Score</span>
+                                            <span className="text-sm font-semibold">{stats.score.toFixed(1)}%</span>
                                         </div>
-                                        <Progress
-                                            value={stats.score}
-                                            className="h-2"
-                                        />
+                                        <Progress value={stats.score} className="h-1.5" />
                                     </div>
 
                                     {/* Attendance & Resources */}
-                                    <div className="flex items-center justify-between text-sm mb-4">
+                                    <div className="flex items-center justify-between text-xs">
                                         <span className={`font-medium ${getAttendanceColor(stats.attendance)}`}>
                                             {stats.attendance.toFixed(0)}% attendance
                                         </span>
                                         <div className="flex items-center gap-1 text-muted-foreground">
                                             <span>{stats.resourceCount} resources</span>
-                                            <ChevronRight className="w-4 h-4" />
+                                            <ChevronRight className="w-3.5 h-3.5" />
                                         </div>
                                     </div>
 
                                     {/* Next Deadline */}
                                     {stats.nextDeadline && (
-                                        <div className="text-sm">
+                                        <div className="text-xs mt-2 pt-2 border-t border-border">
                                             <span className="text-muted-foreground">Next: </span>
                                             <span className="font-medium">{stats.nextDeadline.type}</span>
-                                            <span className="text-muted-foreground"> - {stats.nextDeadline.daysUntil} days</span>
+                                            <span className="text-muted-foreground"> — {stats.nextDeadline.daysUntil}d</span>
                                         </div>
                                     )}
                                 </CardContent>

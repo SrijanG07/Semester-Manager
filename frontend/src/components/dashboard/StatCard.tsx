@@ -1,66 +1,88 @@
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: LucideIcon;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  variant?: "default" | "primary" | "success" | "warning" | "destructive";
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    icon: LucideIcon;
+    variant?: "default" | "primary" | "success" | "warning" | "info";
 }
 
-const variantStyles = {
-  default: "bg-card",
-  primary: "bg-primary/5",
-  success: "bg-success/5",
-  warning: "bg-warning/5",
-  destructive: "bg-destructive/5",
-};
+export function StatCard({ title, value, subtitle, icon: Icon, variant = "default" }: StatCardProps) {
+    const [displayValue, setDisplayValue] = useState<string | number>(value);
+    const [hasAnimated, setHasAnimated] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
 
-const iconStyles = {
-  default: "bg-muted text-muted-foreground",
-  primary: "bg-primary/10 text-primary",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  destructive: "bg-destructive/10 text-destructive",
-};
+    // Animated count-up for numeric values
+    useEffect(() => {
+        if (hasAnimated) return;
 
-export function StatCard({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-  trend,
-  variant = "default",
-}: StatCardProps) {
-  return (
-    <div className={cn("stat-card", variantStyles[variant])}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-semibold mt-1 text-foreground">{value}</p>
-          {subtitle && (
-            <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-          )}
-          {trend && (
-            <p
-              className={cn(
-                "text-xs font-medium mt-2",
-                trend.isPositive ? "text-success" : "text-destructive"
-              )}
-            >
-              {trend.isPositive ? "+" : ""}{trend.value}% from last week
-            </p>
-          )}
+        const numericMatch = String(value).match(/^(\d+\.?\d*)/);
+        if (numericMatch) {
+            const target = parseFloat(numericMatch[1]);
+            const suffix = String(value).slice(numericMatch[0].length);
+            const duration = 800;
+            const startTime = Date.now();
+            const isFloat = String(value).includes('.');
+
+            const animate = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = target * eased;
+
+                if (isFloat) {
+                    setDisplayValue(current.toFixed(1) + suffix);
+                } else {
+                    setDisplayValue(Math.round(current) + suffix);
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    setHasAnimated(true);
+                }
+            };
+
+            requestAnimationFrame(animate);
+        }
+    }, [value, hasAnimated]);
+
+    const variantClass = {
+        default: '',
+        primary: 'stat-card-primary',
+        success: 'stat-card-success',
+        warning: 'stat-card-warning',
+        info: 'stat-card-info',
+    }[variant];
+
+    const iconBadgeClass = {
+        default: 'stat-icon-badge-primary',
+        primary: 'stat-icon-badge-primary',
+        success: 'stat-icon-badge-success',
+        warning: 'stat-icon-badge-warning',
+        info: 'stat-icon-badge-info',
+    }[variant];
+
+    return (
+        <div ref={cardRef} className={cn("stat-card", variantClass)}>
+            <div className="flex items-start justify-between">
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">{title}</p>
+                    <p className="text-2xl font-bold text-foreground tracking-tight animate-count-up">
+                        {displayValue}
+                    </p>
+                    {subtitle && (
+                        <p className="text-xs text-muted-foreground">{subtitle}</p>
+                    )}
+                </div>
+                <div className={cn("stat-icon-badge", iconBadgeClass)}>
+                    <Icon className="w-5 h-5" />
+                </div>
+            </div>
         </div>
-        <div className={cn("p-2.5 rounded-lg", iconStyles[variant])}>
-          <Icon className="w-5 h-5" />
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
