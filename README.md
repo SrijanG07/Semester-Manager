@@ -11,7 +11,7 @@ A full-stack web application that helps students take control of their academic 
 [![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)](https://opensource.org/licenses/ISC)
 
 [Features](#-features) · [Tech Stack](#-tech-stack) · [Getting Started](#-getting-started) · [API Reference](#-api-reference) · [Architecture](#-architecture) · [Deployment](#-deployment)
@@ -98,6 +98,35 @@ A full-stack web application that helps students take control of their academic 
 - Organize resources per subject
 - Direct integration with AI features for uploaded content
 
+### 🏆 Gamification & Achievements
+- **Streak tracking** — daily study streak with visual rewards
+- **Achievements system** — unlock badges for milestones (study hours, streaks, grades)
+- Gamified progress to keep you motivated
+
+### 📝 Notes
+- Rich notes system linked per subject
+- Create, edit, and delete notes for each course
+
+### 🗓️ Timetable
+- Weekly class schedule management
+- Visual timetable grid with subject color coding
+
+### 📊 GPA Calculator
+- Cumulative GPA tracking across semesters
+- Grade-point weighted average computation
+
+### 🎯 Exam Prep
+- AI-generated exam preparation plans per subject
+- Track revision progress topic by topic
+
+### ⚙️ Settings & Notifications
+- User profile and account settings
+- In-app notification system for deadlines and reminders
+- Theme switching (light/dark mode)
+
+### 📤 Export
+- Export academic data (grades, sessions, attendance) for offline use
+
 ### 🔐 Authentication & Security
 - JWT-based secure authentication
 - Password hashing with bcryptjs
@@ -143,48 +172,63 @@ A full-stack web application that helps students take control of their academic 
 
 ```
 academiq/
-├── backend/                    # Express REST API
+├── backend/                    # Express REST API (Node.js / JavaScript)
 │   ├── src/
 │   │   ├── config/            # Database & Supabase configuration
 │   │   ├── controllers/       # Route handlers
-│   │   │   ├── aiController.js        # AI generation, quizzes, flashcards
-│   │   │   ├── authController.js      # Login, register, session
+│   │   │   ├── aiController.js           # AI generation, quizzes, flashcards
+│   │   │   ├── authController.js         # Login, register, session
 │   │   │   ├── attendanceController.js
 │   │   │   ├── deadlineController.js
+│   │   │   ├── exportController.js       # Data export
+│   │   │   ├── gamificationController.js # Streaks & achievements
+│   │   │   ├── gpaController.js          # GPA calculation
 │   │   │   ├── gradingController.js
+│   │   │   ├── noteController.js         # Notes per subject
+│   │   │   ├── notificationController.js # In-app notifications
 │   │   │   ├── resourceController.js
+│   │   │   ├── settingsController.js     # User settings
 │   │   │   ├── studyController.js
 │   │   │   ├── subjectController.js
+│   │   │   ├── timetableController.js    # Weekly timetable
 │   │   │   └── topicController.js
 │   │   ├── lib/
 │   │   │   └── ai/            # AI provider abstraction
 │   │   │       ├── gemini.js          # Gemini API client (text + PDF)
+│   │   │       ├── groq.js            # Groq API client
+│   │   │       ├── provider.js        # Provider selector
 │   │   │       └── prompts.js         # Centralized prompt templates
 │   │   ├── middleware/        # Auth middleware (JWT verification)
-│   │   ├── models/            # Mongoose schemas (13 models)
+│   │   ├── models/            # Mongoose schemas (21 models)
 │   │   ├── routes/            # API route definitions
 │   │   └── server.js          # Entry point
 │   ├── vercel.json            # Backend deployment config
 │   └── package.json
 │
-├── frontend/                   # React SPA
+├── frontend/                   # React SPA (TypeScript)
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ai/            # AI feature UIs (quiz, flashcards, outputs)
 │   │   │   ├── dashboard/     # Dashboard widgets & charts
-│   │   │   ├── layout/        # App shell & navigation
+│   │   │   ├── layout/        # App shell, navigation & command palette
 │   │   │   ├── study/         # Floating study timer
-│   │   │   ├── subjects/      # Subject cards, grading, topics
+│   │   │   ├── subjects/      # Subject cards, grading, topics, AI tab
 │   │   │   └── ui/            # shadcn/ui base components
-│   │   ├── context/           # Auth context provider
+│   │   ├── context/           # Auth & Theme context providers
 │   │   ├── hooks/             # Custom React hooks
 │   │   ├── pages/             # Route-level page components
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── Login.tsx / Register.tsx
-│   │   │   ├── analytics/     # Analytics page
-│   │   │   ├── deadlines/     # Deadline management
-│   │   │   ├── study/         # Study tracker
-│   │   │   └── subjects/      # Subject list, detail, topics
+│   │   │   ├── Achievements.tsx   # Gamification & badges
+│   │   │   ├── ExamPrep.tsx       # AI exam prep plans
+│   │   │   ├── GpaCalculator.tsx  # GPA tracking
+│   │   │   ├── Notes.tsx          # Subject notes
+│   │   │   ├── Settings.tsx       # User settings & theme
+│   │   │   ├── Timetable.tsx      # Weekly schedule
+│   │   │   ├── analytics/         # Analytics page
+│   │   │   ├── deadlines/         # Deadline management
+│   │   │   ├── study/             # Study tracker
+│   │   │   └── subjects/          # Subject list, detail, topics
 │   │   ├── utils/             # API client & helpers
 │   │   └── App.tsx            # Router configuration
 │   ├── vercel.json            # Frontend deployment config
@@ -375,7 +419,7 @@ All endpoints are prefixed with `/api`. Protected routes require `Authorization:
 
 ## 🗄️ Database Schema
 
-The application uses **13 Mongoose models**:
+The application uses **21 Mongoose models**:
 
 | Model | Description |
 |-------|-------------|
@@ -392,6 +436,14 @@ The application uses **13 Mongoose models**:
 | `QuizAttempt` | Quiz scores, answers, and timestamps |
 | `FlashcardProgress` | Spaced repetition state (interval, ease, due date) |
 | `RevisionPlan` | AI-generated revision schedules |
+| `Note` | Rich notes linked per subject |
+| `Notification` | In-app notification records |
+| `Timetable` | Weekly class schedule entries |
+| `Achievement` | Unlocked achievement badges and metadata |
+| `Streak` | Daily study streak tracking |
+| `ExamPrepPlan` | AI-generated exam preparation plans |
+| `ChatMessage` | AI chat message history |
+| `UserSettings` | User preferences and theme settings |
 
 ---
 
@@ -448,7 +500,8 @@ This project is licensed under the **ISC License** — see the [LICENSE](LICENSE
 
 **Srijan Gupta**
 
-- GitHub: [@your-username](https://github.com/your-username)
+- GitHub: [@SrijanG07](https://github.com/SrijanG07)
+- Repository: [Semester-Manager](https://github.com/SrijanG07/Semester-Manager)
 
 ---
 

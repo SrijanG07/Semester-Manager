@@ -51,3 +51,6 @@ coverage/
 .temp/
 .tmp/
 *.bak
+
+# Local MongoDB data directory
+.mongodb_data/
