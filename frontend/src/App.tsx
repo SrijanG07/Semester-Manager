@@ -22,11 +22,13 @@ import ExamPrep from "./pages/ExamPrep";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FloatingStudyTimer from "./components/study/FloatingStudyTimer";
 import CommandPalette from "./components/layout/CommandPalette";
+import AmbientOrbs from "./components/ui/AmbientOrbs";
 
 const App = () => (
     <ThemeProvider defaultTheme="system">
         <TooltipProvider>
             <AuthProvider>
+                <AmbientOrbs />
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
