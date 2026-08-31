@@ -27,7 +27,21 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', process.env.FRONTEND_URL].filter(Boolean),
+    origin: (origin, callback) => {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        const allowed = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+            process.env.FRONTEND_URL
+        ].filter(Boolean);
+
+        if (allowed.includes(origin) || origin.endsWith('.vercel.app') || process.env.NODE_ENV !== 'production') {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
 }));
 app.use(express.json());
