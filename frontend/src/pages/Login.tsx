@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { GraduationCap, BookOpen, BarChart3, Clock, Brain, Trophy, Sparkles } from "lucide-react";
 
+import AmbientOrbs from "@/components/ui/AmbientOrbs";
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -29,7 +31,8 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen flex relative overflow-hidden">
+            <AmbientOrbs />
             {/* Left — Brand panel */}
             <div className="hidden lg:flex lg:w-[45%] auth-gradient-bg relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
