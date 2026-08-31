@@ -8,10 +8,10 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Multer for temp file uploads (files go to Supabase Storage, temp is deleted)
+// Use memory storage for serverless compatibility (Vercel has read-only filesystem)
 const upload = multer({
-    dest: 'uploads/',
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
 });
 
 // Resource routes (attached to subjects)

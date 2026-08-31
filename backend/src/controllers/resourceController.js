@@ -135,7 +135,11 @@ const uploadFile = async (req, res) => {
         const uniqueName = `${uuidv4()}${ext}`;
         const storagePath = `uploads/${uniqueName}`;
 
-        const fileBuffer = fs.readFileSync(req.file.path);
+        const fileBuffer = req.file.buffer || (req.file.path && fs.existsSync(req.file.path) ? fs.readFileSync(req.file.path) : null);
+
+        if (!fileBuffer) {
+            return res.status(400).json({ message: 'Failed to read file buffer' });
+        }
 
         const { error: uploadError } = await supabase.storage
             .from(BUCKET_NAME)
@@ -144,8 +148,8 @@ const uploadFile = async (req, res) => {
                 upsert: false,
             });
 
-        // Clean up temp file
-        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        // Clean up temp file if any exists
+        if (req.file.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
 
         if (uploadError) throw new Error(uploadError.message);
 

@@ -4,15 +4,21 @@ require('dotenv').config();
 let isConnected = false;
 
 const connectDB = async () => {
-    if (isConnected || mongoose.connection.readyState >= 1) {
+    if (isConnected && mongoose.connection.readyState === 1) {
+        return;
+    }
+
+    const mongoURI = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!mongoURI) {
+        console.warn('⚠️ No MONGODB_URI or MONGO_URI provided in environment variables');
         return;
     }
 
     try {
-        const mongoURI = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb+srv://semester-admin:Semester2024Pass@cluster0.jtwyx.mongodb.net/semester-manager?retryWrites=true&w=majority';
-        
+        mongoose.set('strictQuery', false);
         const db = await mongoose.connect(mongoURI, {
             serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 5000,
         });
 
         isConnected = db.connections[0].readyState === 1;
@@ -20,11 +26,6 @@ const connectDB = async () => {
         console.log(`📊 Database: ${mongoose.connection.name}`);
     } catch (error) {
         console.error('❌ MongoDB Connection Error:', error.message);
-        // Do not call process.exit(1) on Vercel as it crashes the entire serverless lambda
-        if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
-            process.exit(1);
-        }
-        throw error;
     }
 };
 
