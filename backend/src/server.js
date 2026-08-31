@@ -22,10 +22,20 @@ const exportRoutes = require('./routes/exportRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to database
-connectDB();
+// Connect to database on startup
+connectDB().catch((err) => console.error('Initial DB connection failed:', err.message));
 
-// Middleware
+// Middleware to ensure DB connection on serverless requests
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(500).json({ message: 'Database connection failed', error: err.message });
+    }
+});
+
+// CORS
 app.use(cors({
     origin: (origin, callback) => {
         // allow requests with no origin (like mobile apps or curl requests)
@@ -44,8 +54,18 @@ app.use(cors({
     },
     credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Root & Health check
+app.get('/', (req, res) => {
+    res.json({ status: 'OK', message: 'AcademiQ API is running' });
+});
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'OK', message: 'AcademiQ API is running' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -64,21 +84,18 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/data', exportRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'AcademiQ API is running' });
-});
-
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📱 Frontend: http://localhost:5173`);
-    console.log(`🔧 API: http://localhost:${PORT}/api`);
-});
+// Start server locally (only when not running inside Vercel serverless)
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📱 Frontend: http://localhost:5173`);
+        console.log(`🔧 API: http://localhost:${PORT}/api`);
+    });
+}
 
 module.exports = app;
