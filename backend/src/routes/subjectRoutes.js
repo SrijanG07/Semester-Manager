@@ -1,15 +1,31 @@
 const express = require('express');
 const {
-    createSubject, getSubjects, getSubject, updateSubject, deleteSubject,
+    createSubject,
+    getSubjects,
+    getSemestersSummary,
+    getSubject,
+    updateSubject,
+    deleteSubject,
+    deleteSemester,
 } = require('../controllers/subjectController');
 const {
-    setGradingScheme, getGradingScheme, addScore, getScores, calculateScore, updateScore, deleteScore,
+    setGradingScheme,
+    getGradingScheme,
+    addScore,
+    getScores,
+    calculateScore,
+    updateScore,
+    deleteScore,
 } = require('../controllers/gradingController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Subject routes
+// Semester routes (must come before /:id)
+router.get('/semesters/summary', protect, getSemestersSummary);
+router.delete('/semesters/:semesterName', protect, deleteSemester);
+
+// Subject CRUD routes
 router.post('/', protect, createSubject);
 router.get('/', protect, getSubjects);
 router.get('/:id', protect, getSubject);
