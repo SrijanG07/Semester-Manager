@@ -2,6 +2,7 @@ const AiOutput = require('../models/AiOutput');
 const FlashcardProgress = require('../models/FlashcardProgress');
 const QuizAttempt = require('../models/QuizAttempt');
 const Resource = require('../models/Resource');
+const Subject = require('../models/Subject');
 const { generateFromPdf, generateFromText } = require('../lib/ai/provider');
 const {
     getSummaryPrompt,
@@ -64,7 +65,7 @@ const generateAiOutput = async (req, res) => {
 
         // Get the resource
         const resource = await Resource.findById(resourceId);
-        if (!resource) {
+        if (!resource || !await Subject.exists({ _id: resource.subjectId, userId: req.user._id })) {
             return res.status(404).json({ message: 'Resource not found.' });
         }
 

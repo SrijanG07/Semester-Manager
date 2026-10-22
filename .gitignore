@@ -54,3 +54,5 @@ coverage/
 
 # Local MongoDB data directory
 .mongodb_data/
+
+*.tsbuildinfo

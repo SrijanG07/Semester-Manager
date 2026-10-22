@@ -39,7 +39,7 @@ const Dashboard = () => {
                 );
 
                 scoreResults.forEach((result) => {
-                    if (result.status === 'fulfilled' && result.value.data?.currentScore > 0) {
+                    if (result.status === 'fulfilled' && result.value.data?.totalWeightEntered > 0) {
                         totalScore += result.value.data.currentScore;
                         scoredCount++;
                     }

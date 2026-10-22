@@ -53,11 +53,23 @@ async function callGeminiWithPdf(prompt, pdfUrl, jsonMode = false) {
     const model = client.getGenerativeModel({ model: MODEL_NAME, generationConfig });
 
     // Download the PDF
-    const response = await fetch(pdfUrl);
+    const url = new URL(pdfUrl);
+    const storage = new URL(process.env.SUPABASE_URL);
+    if (url.protocol !== 'https:' || url.origin !== storage.origin || !url.pathname.startsWith('/storage/v1/object/')) {
+        throw new Error('Only configured storage files can be analyzed');
+    }
+    const response = await fetch(url, { redirect: 'error', signal: AbortSignal.timeout(15000) });
     if (!response.ok) {
         throw new Error(`Failed to download PDF: ${response.status} ${response.statusText}`);
     }
-    const arrayBuffer = await response.arrayBuffer();
+    const chunks = [];
+    let size = 0;
+    for await (const chunk of response.body) {
+        size += chunk.length;
+        if (size > 10 * 1024 * 1024) throw new Error('File exceeds 10 MB');
+        chunks.push(chunk);
+    }
+    const arrayBuffer = Buffer.concat(chunks);
     const base64Data = Buffer.from(arrayBuffer).toString('base64');
 
     // Determine MIME type from response headers or default to PDF

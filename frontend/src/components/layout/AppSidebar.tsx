@@ -70,7 +70,7 @@ export function AppSidebar() {
                 </div>
                 {!collapsed && (
                     <span className="text-[15px] font-bold text-foreground tracking-tight animate-fade-in">
-                        AcademiQ
+                        AcademicQ
                     </span>
                 )}
             </div>

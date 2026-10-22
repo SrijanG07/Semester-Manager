@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Calculator, TrendingUp, Award, Sliders, BookOpen } from "lucide-react";
 
 interface SubjectGpa {
@@ -104,7 +104,7 @@ const GpaCalculator = () => {
                                 </span>
                             </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-foreground">Semester GPA</h3>
+                        <h3 className="text-lg font-semibold text-foreground">Overall GPA</h3>
                         <p className="text-sm text-muted-foreground">
                             {gpaData?.totalCredits || 0} total credits
                         </p>

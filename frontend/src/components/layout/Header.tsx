@@ -103,12 +103,6 @@ export function Header({ title, subtitle }: HeaderProps) {
                     )}
                 </Button>
 
-                {/* Notifications */}
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-lg">
-                    <Bell className="w-[18px] h-[18px] text-muted-foreground" />
-                    <span className="notification-dot" />
-                </Button>
-
                 {/* User Menu */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

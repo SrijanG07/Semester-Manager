@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useEffect, useState, useCallback } from "react";
 import api from "../utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Plus, Search, StickyNote, Pin, PinOff, Trash2, X, BookOpen } from "lucide-react";
 
 interface Note {

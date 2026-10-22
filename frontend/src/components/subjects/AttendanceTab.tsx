@@ -79,7 +79,7 @@ const AttendanceTab: React.FC<AttendanceTabProps> = ({ subjectId, stats, onUpdat
     const classesNeededFor75 = () => {
         if (stats.percentage >= 75) return 0;
         const totalClasses = stats.total;
-        const presentClasses = stats.present + stats.late;
+        const presentClasses = stats.present;
         const needed = Math.ceil(3 * totalClasses - 4 * presentClasses);
         return Math.max(0, needed);
     };
@@ -87,7 +87,7 @@ const AttendanceTab: React.FC<AttendanceTabProps> = ({ subjectId, stats, onUpdat
     const classesCanSkip = () => {
         if (stats.percentage < 75) return 0;
         const totalClasses = stats.total;
-        const presentClasses = stats.present + stats.late;
+        const presentClasses = stats.present;
         const canSkip = Math.floor((presentClasses / 0.75) - totalClasses);
         return Math.max(0, canSkip);
     };

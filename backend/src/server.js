@@ -30,7 +30,7 @@ app.use(async (req, res, next) => {
     try {
         await connectDB();
     } catch (err) {
-        console.error('DB connection error in middleware:', err.message);
+        return res.status(503).json({ message: 'Database unavailable' });
     }
     next();
 });
@@ -47,7 +47,7 @@ app.use(cors({
             process.env.FRONTEND_URL
         ].filter(Boolean);
 
-        if (allowed.includes(origin) || origin.endsWith('.vercel.app') || process.env.NODE_ENV !== 'production') {
+        if (allowed.includes(origin) || process.env.NODE_ENV !== 'production') {
             return callback(null, true);
         }
         return callback(new Error('Not allowed by CORS'));
@@ -83,6 +83,13 @@ app.use('/api/gamification', gamificationRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/data', exportRoutes);
+
+// Consistent JSON errors for validation and unexpected failures.
+app.use((error, req, res, next) => {
+    console.error(error);
+    const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
+    res.status(status).json({ message: status === 400 ? error.message : 'Request failed. Please try again.' });
+});
 
 // 404 handler
 app.use((req, res) => {

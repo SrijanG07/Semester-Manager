@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Brain, Calendar, BookOpen, Play, CheckCircle2, Clock, Sparkles, AlertCircle } from "lucide-react";
 
 interface Subject {
@@ -23,7 +23,11 @@ const ExamPrep = () => {
     const [topics, setTopics] = useState<Topic[]>([]);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
-    const [plan, setPlan] = useState<any>(null);
+    const planKey = `exam-plan:${JSON.parse(localStorage.getItem('user') || '{}')._id}`;
+    const [plan, setPlan] = useState<any>(() => {
+        try { return JSON.parse(localStorage.getItem(planKey) || 'null'); } catch { return null; }
+    });
+    useEffect(() => { localStorage.setItem(planKey, JSON.stringify(plan)); }, [plan, planKey]);
 
     useEffect(() => {
         api.get('/subjects').then(res => {
@@ -113,7 +117,7 @@ const ExamPrep = () => {
 
     if (loading) {
         return (
-            <DashboardLayout title="Exam Prep" subtitle="AI-powered revision coach">
+            <DashboardLayout title="Exam Prep" subtitle="Your revision schedule">
                 <div className="flex items-center justify-center h-64">
                     <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
@@ -122,7 +126,7 @@ const ExamPrep = () => {
     }
 
     return (
-        <DashboardLayout title="Exam Prep" subtitle="AI-powered revision coach">
+        <DashboardLayout title="Exam Prep" subtitle="Your revision schedule">
             <div className="space-y-6">
                 {/* Setup */}
                 {!plan && (

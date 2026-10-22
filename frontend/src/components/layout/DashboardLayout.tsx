@@ -51,7 +51,7 @@ export function DashboardLayout({ children, title, subtitle }: DashboardLayoutPr
                         <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                             <GraduationCap className="w-4 h-4 text-primary-foreground" />
                         </div>
-                        <span className="text-sm font-bold text-foreground">AcademiQ</span>
+                        <span className="text-sm font-bold text-foreground">AcademicQ</span>
                     </div>
                 </div>
 
@@ -68,7 +68,7 @@ export function DashboardLayout({ children, title, subtitle }: DashboardLayoutPr
                                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                                         <GraduationCap className="w-4 h-4 text-primary-foreground" />
                                     </div>
-                                    <span className="text-sm font-bold">AcademiQ</span>
+                                    <span className="text-sm font-bold">AcademicQ</span>
                                 </div>
                                 <button
                                     onClick={() => setMobileMenuOpen(false)}

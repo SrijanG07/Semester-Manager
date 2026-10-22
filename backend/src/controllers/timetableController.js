@@ -19,6 +19,7 @@ const createTimetableEntry = async (req, res) => {
     try {
         const { subjectId, dayOfWeek, startTime, endTime, room, type } = req.body;
 
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(startTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(endTime) || endTime <= startTime) return res.status(400).json({ message: 'Enter a valid start and end time' });
         // Check for time conflicts
         const conflicts = await Timetable.find({
             userId: req.user._id,
@@ -48,13 +49,20 @@ const createTimetableEntry = async (req, res) => {
 // @route PUT /api/timetable/:id
 const updateTimetableEntry = async (req, res) => {
     try {
-        const entry = await Timetable.findOneAndUpdate(
-            { _id: req.params.id, userId: req.user._id },
-            req.body,
-            { new: true, runValidators: true }
-        ).populate('subjectId', 'name color code');
-
+        const entry = await Timetable.findOne({ _id: req.params.id, userId: req.user._id });
         if (!entry) return res.status(404).json({ message: 'Entry not found' });
+        for (const field of ['subjectId', 'dayOfWeek', 'startTime', 'endTime', 'room', 'type']) {
+            if (req.body[field] !== undefined) entry[field] = req.body[field];
+        }
+        const validTime = /^([01]\d|2[0-3]):[0-5]\d$/;
+        if (!validTime.test(entry.startTime) || !validTime.test(entry.endTime) || entry.endTime <= entry.startTime) {
+            return res.status(400).json({ message: 'Enter a valid start and end time' });
+        }
+        if (await Timetable.exists({ userId: req.user._id, _id: { $ne: entry._id }, dayOfWeek: entry.dayOfWeek, startTime: { $lt: entry.endTime }, endTime: { $gt: entry.startTime } })) {
+            return res.status(400).json({ message: 'Time slot conflicts with an existing entry' });
+        }
+        await entry.save();
+        await entry.populate('subjectId', 'name color code');
         res.json(entry);
     } catch (error) {
         res.status(500).json({ message: error.message });

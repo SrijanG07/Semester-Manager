@@ -1,3 +1,4 @@
+const { ownsRecord } = require('../middleware/ownership');
 const express = require('express');
 const multer = require('multer');
 const {
@@ -15,15 +16,15 @@ const upload = multer({
 });
 
 // Resource routes (attached to subjects)
-router.post('/:id/resources', protect, createResource);
-router.get('/:id/resources', protect, getResources);
+router.post('/:id/resources', protect, ownsRecord('Subject', 'id'), createResource);
+router.get('/:id/resources', protect, ownsRecord('Subject', 'id'), getResources);
 
 // Resource management
-router.get('/resources/:resourceId', protect, getResource);
-router.put('/resources/:resourceId', protect, updateResource);
-router.delete('/resources/:resourceId', protect, deleteResource);
-router.patch('/resources/:resourceId/complete', protect, toggleCompletion);
-router.post('/resources/:resourceId/link-notes', protect, linkPersonalNotes);
+router.get('/resources/:resourceId', protect, ownsRecord('Resource', 'resourceId'), getResource);
+router.put('/resources/:resourceId', protect, ownsRecord('Resource', 'resourceId'), updateResource);
+router.delete('/resources/:resourceId', protect, ownsRecord('Resource', 'resourceId'), deleteResource);
+router.patch('/resources/:resourceId/complete', protect, ownsRecord('Resource', 'resourceId'), toggleCompletion);
+router.post('/resources/:resourceId/link-notes', protect, ownsRecord('Resource', 'resourceId'), linkPersonalNotes);
 
 // File upload
 router.post('/upload', protect, upload.single('file'), uploadFile);

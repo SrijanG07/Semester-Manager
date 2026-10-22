@@ -10,10 +10,10 @@ const BUCKET_NAME = 'sem';
 // @route POST /api/subjects/:id/resources
 const createResource = async (req, res) => {
     try {
-        const { title, type, fileUrl, externalLink, topicId, tags } = req.body;
+        const { title, type, fileUrl, externalLink, topicId, tags, firebaseStoragePath } = req.body;
         const resource = await Resource.create({
             subjectId: req.params.id,
-            topicId, title, type, fileUrl, externalLink,
+            topicId, title, type, fileUrl, externalLink, firebaseStoragePath,
             tags: tags || [],
         });
         res.status(201).json(resource);

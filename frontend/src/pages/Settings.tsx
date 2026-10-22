@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import api from "../utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Sun, Moon, Monitor, Clock, Coffee, Timer, Bell, BellOff, Volume2, VolumeX, Save, User, Lock, GraduationCap, Palette } from "lucide-react";
 
 interface Settings {
@@ -33,7 +33,7 @@ const defaultSettings: Settings = {
 };
 
 const Settings = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const { theme, setTheme } = useTheme();
     const [settings, setSettings] = useState<Settings>(defaultSettings);
     const [loading, setLoading] = useState(true);
@@ -94,6 +94,7 @@ const Settings = () => {
             // Update local storage
             const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
             storedUser.name = data.name;
+            updateUser(storedUser);
             localStorage.setItem('user', JSON.stringify(storedUser));
 
             setCurrentPassword('');

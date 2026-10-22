@@ -1,5 +1,10 @@
 const Deadline = require('../models/Deadline');
 const Subject = require('../models/Subject');
+async function refreshPriorities(userId) {
+    const subjects = await Subject.find({ userId }).select('_id');
+    const deadlines = await Deadline.find({ subjectId: { $in: subjects.map(s => s._id) }, completed: false });
+    await Promise.all(deadlines.map(deadline => deadline.save()));
+}
 
 // @desc Create deadline
 // @route POST /api/deadlines
@@ -21,6 +26,7 @@ const createDeadline = async (req, res) => {
 // @route GET /api/deadlines
 const getDeadlines = async (req, res) => {
     try {
+        await refreshPriorities(req.user._id);
         const { subjectId, completed, priority } = req.query;
 
         const userSubjects = await Subject.find({ userId: req.user._id });
@@ -48,6 +54,7 @@ const getDeadlines = async (req, res) => {
 // @route GET /api/deadlines/urgent
 const getUrgentDeadlines = async (req, res) => {
     try {
+        await refreshPriorities(req.user._id);
         const userSubjects = await Subject.find({ userId: req.user._id });
         const subjectIds = userSubjects.map(s => s._id);
 
