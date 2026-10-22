@@ -45,7 +45,7 @@ function getGradeInfo(percentage, scale) {
 // @route GET /api/gpa/calculate
 const calculateGpa = async (req, res) => {
     try {
-        const subjects = await Subject.find({ userId: req.user._id });
+        const subjects = await Subject.find({ userId: req.user._id, ...(req.query.semester ? { semester: req.query.semester } : {}) });
         const settings = await UserSettings.findOne({ userId: req.user._id });
         const scale = settings?.gpaScale || '10.0';
 
@@ -121,7 +121,7 @@ const calculateGpa = async (req, res) => {
 const simulateGpa = async (req, res) => {
     try {
         const { overrides } = req.body; // [{ subjectId, componentName, score, max }]
-        const subjects = await Subject.find({ userId: req.user._id });
+        const subjects = await Subject.find({ userId: req.user._id, ...(req.query.semester ? { semester: req.query.semester } : {}) });
         const settings = await UserSettings.findOne({ userId: req.user._id });
         const scale = settings?.gpaScale || '10.0';
 

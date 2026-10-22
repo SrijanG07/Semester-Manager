@@ -33,10 +33,11 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 'system' }) => {
     const [theme, setThemeState] = useState<Theme>(() => {
         const stored = localStorage.getItem('academiq-theme') as Theme | null;
-        return stored || defaultTheme;
+        return stored && ['light', 'dark', 'system'].includes(stored) ? stored : defaultTheme;
     });
 
-    const resolvedTheme = theme === 'system' ? getSystemTheme() : theme;
+    const [systemTheme, setSystemTheme] = useState(getSystemTheme);
+    const resolvedTheme = theme === 'system' ? systemTheme : theme;
 
     const setTheme = (newTheme: Theme) => {
         setThemeState(newTheme);
@@ -58,6 +59,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultT
             const root = document.documentElement;
             root.classList.remove('light', 'dark');
             root.classList.add(getSystemTheme());
+            setSystemTheme(getSystemTheme());
         };
 
         mediaQuery.addEventListener('change', handler);

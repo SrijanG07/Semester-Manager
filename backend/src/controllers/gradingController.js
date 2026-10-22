@@ -119,12 +119,13 @@ const calculateScore = async (req, res) => {
 // @route PUT /api/scores/:scoreId
 const updateScore = async (req, res) => {
     try {
-        const score = await Score.findByIdAndUpdate(
-            req.params.scoreId,
-            { ...req.body, lastUpdated: Date.now() },
-            { new: true, runValidators: true }
-        );
+        const score = await Score.findById(req.params.scoreId);
         if (!score) return res.status(404).json({ message: 'Score not found' });
+        for (const field of ['componentName', 'obtained', 'max', 'classAverage', 'classMax', 'classMin']) {
+            if (req.body[field] !== undefined) score[field] = req.body[field];
+        }
+        score.lastUpdated = new Date();
+        await score.save();
         res.json(score);
     } catch (error) {
         res.status(500).json({ message: error.message });

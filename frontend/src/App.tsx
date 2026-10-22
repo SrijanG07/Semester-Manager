@@ -1,24 +1,25 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import SubjectsList from "./pages/subjects/SubjectsList";
-import SubjectDetail from "./pages/subjects/SubjectDetail";
-import StudyTracker from "./pages/study/StudyTracker";
-import Deadlines from "./pages/deadlines/Deadlines";
-import TopicsPage from "./pages/subjects/TopicsPage";
-import Analytics from "./pages/analytics/Analytics";
-import Settings from "./pages/Settings";
-import GpaCalculator from "./pages/GpaCalculator";
-import Timetable from "./pages/Timetable";
-import Achievements from "./pages/Achievements";
-import Notes from "./pages/Notes";
-import ExamPrep from "./pages/ExamPrep";
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SubjectsList = lazy(() => import("./pages/subjects/SubjectsList"));
+const SubjectDetail = lazy(() => import("./pages/subjects/SubjectDetail"));
+const StudyTracker = lazy(() => import("./pages/study/StudyTracker"));
+const Deadlines = lazy(() => import("./pages/deadlines/Deadlines"));
+const TopicsPage = lazy(() => import("./pages/subjects/TopicsPage"));
+const Analytics = lazy(() => import("./pages/analytics/Analytics"));
+const Settings = lazy(() => import("./pages/Settings"));
+const GpaCalculator = lazy(() => import("./pages/GpaCalculator"));
+const Timetable = lazy(() => import("./pages/Timetable"));
+const Achievements = lazy(() => import("./pages/Achievements"));
+const Notes = lazy(() => import("./pages/Notes"));
+const ExamPrep = lazy(() => import("./pages/ExamPrep"));
 import ProtectedRoute from "./components/ProtectedRoute";
 import FloatingStudyTimer from "./components/study/FloatingStudyTimer";
 import CommandPalette from "./components/layout/CommandPalette";
@@ -30,7 +31,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
-                    <Routes>
+                    <Suspense fallback={<div className="p-8 text-muted-foreground" role="status">Loading workspace…</div>}><Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -47,7 +48,7 @@ const App = () => (
                         <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
                         <Route path="/exam-prep" element={<ProtectedRoute><ExamPrep /></ProtectedRoute>} />
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    </Routes>
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} /></Routes></Suspense>
                     <FloatingStudyTimer />
                     <CommandPalette />
                 </BrowserRouter>

@@ -1,3 +1,4 @@
+const { ownsRecord } = require('../middleware/ownership');
 const express = require('express');
 const {
     createSubject,
@@ -28,20 +29,20 @@ router.delete('/semesters/:semesterName', protect, deleteSemester);
 // Subject CRUD routes
 router.post('/', protect, createSubject);
 router.get('/', protect, getSubjects);
-router.get('/:id', protect, getSubject);
-router.put('/:id', protect, updateSubject);
-router.delete('/:id', protect, deleteSubject);
+router.get('/:id', protect, ownsRecord('Subject', 'id'), getSubject);
+router.put('/:id', protect, ownsRecord('Subject', 'id'), updateSubject);
+router.delete('/:id', protect, ownsRecord('Subject', 'id'), deleteSubject);
 
 // Grading routes
-router.post('/:id/grading', protect, setGradingScheme);
-router.put('/:id/grading', protect, setGradingScheme);
-router.get('/:id/grading', protect, getGradingScheme);
+router.post('/:id/grading', protect, ownsRecord('Subject', 'id'), setGradingScheme);
+router.put('/:id/grading', protect, ownsRecord('Subject', 'id'), setGradingScheme);
+router.get('/:id/grading', protect, ownsRecord('Subject', 'id'), getGradingScheme);
 
 // Score routes
-router.post('/:id/scores', protect, addScore);
-router.get('/:id/scores', protect, getScores);
-router.get('/:id/calculate', protect, calculateScore);
-router.put('/scores/:scoreId', protect, updateScore);
-router.delete('/scores/:scoreId', protect, deleteScore);
+router.post('/:id/scores', protect, ownsRecord('Subject', 'id'), addScore);
+router.get('/:id/scores', protect, ownsRecord('Subject', 'id'), getScores);
+router.get('/:id/calculate', protect, ownsRecord('Subject', 'id'), calculateScore);
+router.put('/scores/:scoreId', protect, ownsRecord('Score', 'scoreId'), updateScore);
+router.delete('/scores/:scoreId', protect, ownsRecord('Score', 'scoreId'), deleteScore);
 
 module.exports = router;

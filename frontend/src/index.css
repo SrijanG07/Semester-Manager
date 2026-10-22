@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
+    --background: 45 20% 97%;
     --foreground: 224 40% 14%;
 
     --card: 0 0% 100%;
@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 224 40% 14%;
 
-    --primary: 262 80% 55%;
+    --primary: 153 38% 28%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 250 25% 95%;
@@ -38,31 +38,31 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 262 80% 55%;
+    --ring: 153 38% 28%;
 
     --radius: 0.75rem;
 
     /* Sidebar — clean white */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 10% 46%;
-    --sidebar-primary: 262 80% 55%;
+    --sidebar-primary: 153 38% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 262 80% 96%;
-    --sidebar-accent-foreground: 262 80% 45%;
+    --sidebar-accent: 150 20% 95%;
+    --sidebar-accent-foreground: 153 38% 28%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 262 80% 55%;
+    --sidebar-ring: 153 38% 28%;
     --sidebar-muted: 220 10% 46%;
 
     /* Subject Colors */
     --subject-blue: 221 83% 53%;
     --subject-green: 152 69% 40%;
-    --subject-purple: 262 80% 55%;
+    --subject-purple: 153 38% 28%;
     --subject-orange: 25 95% 53%;
     --subject-pink: 330 81% 60%;
     --subject-teal: 173 80% 40%;
 
     /* Chart Colors */
-    --chart-1: 262 80% 55%;
+    --chart-1: 153 38% 28%;
     --chart-2: 152 69% 40%;
     --chart-3: 221 83% 53%;
     --chart-4: 25 95% 53%;
@@ -81,17 +81,17 @@
   }
 
   .dark {
-    --background: 0 0% 5%;
+    --background: 210 18% 8%;
     --foreground: 210 15% 95%;
 
-    --card: 0 0% 8%;
+    --card: 210 15% 11%;
     --card-foreground: 210 15% 95%;
 
-    --popover: 0 0% 8%;
+    --popover: 210 15% 11%;
     --popover-foreground: 210 15% 95%;
 
-    --primary: 200 85% 60%;
-    --primary-foreground: 0 0% 5%;
+    --primary: 155 65% 72%;
+    --primary-foreground: 210 18% 8%;
 
     --secondary: 0 0% 12%;
     --secondary-foreground: 210 15% 90%;
@@ -109,20 +109,20 @@
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 5%;
+    --warning-foreground: 210 18% 8%;
 
     --border: 0 0% 15%;
     --input: 0 0% 15%;
-    --ring: 200 85% 60%;
+    --ring: 155 65% 72%;
 
     --sidebar-background: 0 0% 6%;
     --sidebar-foreground: 210 10% 65%;
-    --sidebar-primary: 200 85% 60%;
-    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-primary: 155 65% 72%;
+    --sidebar-primary-foreground: 210 18% 8%;
     --sidebar-accent: 0 0% 11%;
     --sidebar-accent-foreground: 210 15% 90%;
     --sidebar-border: 0 0% 13%;
-    --sidebar-ring: 200 85% 60%;
+    --sidebar-ring: 155 65% 72%;
     --sidebar-muted: 210 5% 45%;
 
     --glass-bg: rgba(10, 10, 10, 0.8);
@@ -481,7 +481,7 @@
 
   .auth-gradient-bg {
     background: linear-gradient(-45deg, 
-      hsl(262 80% 55%),
+      hsl(153 38% 28%),
       hsl(280 70% 50%),
       hsl(221 83% 53%),
       hsl(262 80% 65%)
@@ -595,7 +595,7 @@
   inset: 0;
   background: linear-gradient(135deg,
     hsl(var(--primary)) 0%,
-    hsl(262 80% 45%) 50%,
+    hsl(153 38% 28%) 50%,
     hsl(280 70% 50%) 100%
   );
 }
@@ -918,4 +918,12 @@
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-}
+}
+
+/* Workspace surfaces: quiet in both themes, with clear focus states. */
+.auth-gradient-bg { background: hsl(153 32% 19%); }
+.stat-card, .quick-action-btn { box-shadow: none; background-image: none; }
+.quick-action-btn:hover { transform: none; border-color: hsl(var(--primary)); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

@@ -137,6 +137,7 @@ const getStreak = async (req, res) => {
         if (!streak) {
             streak = { currentStreak: 0, longestStreak: 0, lastStudyDate: null, totalStudyDays: 0 };
         }
+        if (streak.lastStudyDate && Date.now() - new Date(streak.lastStudyDate).getTime() > 2 * 86400000) streak.currentStreak = 0;
         res.json(streak);
     } catch (error) {
         res.status(500).json({ message: error.message });

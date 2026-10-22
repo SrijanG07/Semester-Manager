@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '../utils/api';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface User {
     _id: string;
@@ -14,6 +14,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => void;
+    updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem('user');
 
         if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
+            try { setUser(JSON.parse(storedUser)); } catch { localStorage.removeItem('user'); localStorage.removeItem('token'); }
         }
         setLoading(false);
     }, []);
@@ -84,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     const logout = () => {
+        localStorage.removeItem('study-tracker-active-session');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
@@ -91,7 +93,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser: setUser }}>
             {children}
         </AuthContext.Provider>
     );

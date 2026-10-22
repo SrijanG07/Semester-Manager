@@ -23,7 +23,12 @@ const syncAttendance = async (req, res) => {
             return res.status(400).json({ message: 'Invalid attendance data' });
         }
 
-        const userId = req.user?.id;
+        for (const data of Object.values(attendanceData)) {
+            if (!data || !Number.isInteger(data.attended) || !Number.isInteger(data.total) || data.attended < 0 || data.total < data.attended || data.total > 2000) {
+                return res.status(400).json({ message: 'Attendance requires valid integer counts (0–2000)' });
+            }
+        }
+        const userId = req.user._id;
         const results = [];
 
         for (const [subjectName, data] of Object.entries(attendanceData)) {

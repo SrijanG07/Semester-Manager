@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Plus, X, Clock, MapPin, Trash2 } from "lucide-react";
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

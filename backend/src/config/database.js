@@ -10,8 +10,7 @@ const connectDB = async () => {
 
     const mongoURI = process.env.MONGODB_URI || process.env.MONGO_URI;
     if (!mongoURI) {
-        console.warn('⚠️ No MONGODB_URI or MONGO_URI provided in environment variables');
-        return;
+        throw new Error('MONGODB_URI is required');
     }
 
     try {
@@ -25,7 +24,7 @@ const connectDB = async () => {
         console.log('✅ MongoDB Connected Successfully');
         console.log(`📊 Database: ${mongoose.connection.name}`);
     } catch (error) {
-        console.error('❌ MongoDB Connection Error:', error.message);
+        throw error;
     }
 };
 

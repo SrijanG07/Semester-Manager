@@ -74,6 +74,7 @@ const getStudyStats = async (req, res) => {
         // Subject-wise distribution
         const subjectStats = {};
         sessions.forEach(session => {
+            if (!session.subjectId) return;
             const sid = session.subjectId._id.toString();
             if (!subjectStats[sid]) {
                 subjectStats[sid] = {

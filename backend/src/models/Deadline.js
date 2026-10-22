@@ -35,7 +35,7 @@ deadlineSchema.pre('save', async function () {
         const dueDate = new Date(this.dueDate);
         const daysUntil = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-        if (daysUntil < 0) this.priority = 'overdue';
+        if (dueDate.getTime() < now.getTime()) this.priority = 'overdue';
         else if (daysUntil <= 3) this.priority = 'urgent';
         else if (daysUntil <= 7) this.priority = 'soon';
         else this.priority = 'later';

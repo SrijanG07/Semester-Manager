@@ -13,14 +13,27 @@ const Timetable = require('../models/Timetable');
 // Helper to cascade-delete data for an array of subject IDs
 const cascadeDeleteSubjects = async (subjectIds) => {
     if (!subjectIds || subjectIds.length === 0) return;
-    await Promise.allSettled([
+    const resources = await Resource.find({ subjectId: { $in: subjectIds } });
+    const resourceIds = resources.map(r => r._id);
+    const outputs = await AiOutput.find({ resourceId: { $in: resourceIds } }).select('_id');
+    const outputIds = outputs.map(o => o._id);
+    const paths = resources.map(r => r.firebaseStoragePath).filter(Boolean);
+    if (paths.length) {
+        const storage = require('../config/supabase');
+        if (!storage) throw new Error('Storage is unavailable; deletion cancelled');
+        const { error } = await storage.storage.from('sem').remove(paths);
+        if (error) throw error;
+    }
+    await Promise.all([
         Attendance.deleteMany({ subjectId: { $in: subjectIds } }),
         Score.deleteMany({ subjectId: { $in: subjectIds } }),
         Topic.deleteMany({ subjectId: { $in: subjectIds } }),
         Resource.deleteMany({ subjectId: { $in: subjectIds } }),
         Deadline.deleteMany({ subjectId: { $in: subjectIds } }),
         StudySession.deleteMany({ subjectId: { $in: subjectIds } }),
-        AiOutput.deleteMany({ subjectId: { $in: subjectIds } }),
+        AiOutput.deleteMany({ resourceId: { $in: resourceIds } }),
+        require('../models/QuizAttempt').deleteMany({ aiOutputId: { $in: outputIds } }),
+        require('../models/FlashcardProgress').deleteMany({ aiOutputId: { $in: outputIds } }),
         GradingComponent.deleteMany({ subjectId: { $in: subjectIds } }),
         Note.deleteMany({ subjectId: { $in: subjectIds } }),
         Timetable.deleteMany({ subjectId: { $in: subjectIds } }),

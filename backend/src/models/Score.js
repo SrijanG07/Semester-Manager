@@ -9,7 +9,7 @@ const scoreSchema = new mongoose.Schema(
         },
         componentName: { type: String, required: true },
         obtained: { type: Number, required: true, min: 0 },
-        max: { type: Number, required: true, min: 0 },
+        max: { type: Number, required: true, min: 1 },
         classAverage: { type: Number, min: 0 },
         classMax: { type: Number, min: 0 },
         classMin: { type: Number, min: 0 },
