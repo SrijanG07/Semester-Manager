@@ -59,6 +59,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Respond to browser preflight before protected routes execute.
+app.options('/{*splat}', cors());
+
 // Root & Health check
 app.get('/', (req, res) => {
     res.json({ status: 'OK', message: 'AcademiQ API is running' });

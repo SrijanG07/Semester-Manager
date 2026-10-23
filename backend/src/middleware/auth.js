@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is required');
+
+const getJwtSecret = () => process.env.JWT_SECRET;
 
 const protect = async (req, res, next) => {
     try {
+        if (!getJwtSecret()) return res.status(503).json({ message: 'JWT_SECRET is not configured' });
         let token;
 
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -14,7 +16,7 @@ const protect = async (req, res, next) => {
             return res.status(401).json({ message: 'Not authorized, no token' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
         req.user = await User.findById(decoded.id).select('-password');
 
         if (!req.user) {
@@ -48,7 +50,9 @@ const protect = async (req, res, next) => {
 };
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+    const secret = getJwtSecret();
+    if (!secret) throw new Error('JWT_SECRET is not configured');
+    return jwt.sign({ id }, secret, {
         expiresIn: '30d',
     });
 };
