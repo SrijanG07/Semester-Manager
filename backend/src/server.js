@@ -47,7 +47,8 @@ app.use(cors({
             process.env.FRONTEND_URL
         ].filter(Boolean);
 
-        if (allowed.includes(origin) || process.env.NODE_ENV !== 'production') {
+        const vercelOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null;
+        if (allowed.includes(origin) || origin === vercelOrigin || process.env.NODE_ENV !== 'production') {
             return callback(null, true);
         }
         return callback(new Error('Not allowed by CORS'));

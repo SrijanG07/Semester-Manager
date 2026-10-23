@@ -16,7 +16,7 @@ function ownsRecord(modelName, parameter) {
                 return res.status(404).json({ message: 'Record not found' });
             }
             // Ownership and relationship fields cannot be reassigned through an update.
-            if (req.method === 'PUT' || req.method === 'PATCH') {
+            if ((req.method === 'PUT' || req.method === 'PATCH') && req.body && typeof req.body === 'object') {
                 for (const key of ['_id', 'userId', 'subjectId', 'createdAt']) delete req.body[key];
                 if (Object.keys(req.body).some(key => key.startsWith('$'))) {
                     return res.status(400).json({ message: 'Update operators are not allowed' });
